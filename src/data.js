@@ -5,7 +5,12 @@ window.CollectraData = (() => {
     meta: {
       workspace: "Gulf trading demo",
       location: "Dubai, UAE",
-      today
+      today,
+      owner: "Dhiraj",
+      industry: "B2B trading and import/export",
+      currency: "AED",
+      note: "Collectra helps quote-driven B2B teams turn commercial follow-up into collected cash.",
+      updatedAt: ""
     },
     customers: [
       {
@@ -149,7 +154,8 @@ window.CollectraData = (() => {
     deals: "Deal pipeline",
     quotes: "Quote builder",
     invoices: "Invoice control board",
-    desk: "AI follow-up desk"
+    desk: "AI follow-up desk",
+    settings: "Workspace settings"
   };
 
   function cloneInitialState() {

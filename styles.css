@@ -284,7 +284,8 @@ h3 {
 }
 
 .dashboard-grid,
-.desk-layout {
+.desk-layout,
+.settings-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 18px;
@@ -743,6 +744,46 @@ td strong {
   padding: 16px;
 }
 
+.data-health {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.data-health article {
+  display: grid;
+  gap: 6px;
+  min-height: 82px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+  padding: 12px;
+}
+
+.data-health span {
+  color: var(--muted);
+}
+
+.data-health strong {
+  overflow-wrap: anywhere;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .toast {
   position: fixed;
   right: 22px;
@@ -800,6 +841,7 @@ td strong {
   .topbar,
   .dashboard-grid,
   .desk-layout,
+  .settings-layout,
   .quote-layout {
     grid-template-columns: 1fr;
     flex-direction: column;

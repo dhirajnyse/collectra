@@ -2,17 +2,21 @@
   const { cloneInitialState, stages, titleMap } = window.CollectraData;
   const storage = window.CollectraStorage;
   const pdf = window.CollectraPdf;
-  const currency = new Intl.NumberFormat("en-AE", {
-    style: "currency",
-    currency: "AED",
-    maximumFractionDigits: 0
-  });
 
   let state = storage.load(cloneInitialState());
   let invoiceFilter = "all";
 
   function money(value) {
-    return currency.format(value).replace("AED", "AED ");
+    const code = state.meta.currency || "AED";
+    try {
+      return new Intl.NumberFormat("en-AE", {
+        style: "currency",
+        currency: code,
+        maximumFractionDigits: 0
+      }).format(value).replace(code, `${code} `);
+    } catch (error) {
+      return `AED ${Number(value || 0).toLocaleString("en-AE", { maximumFractionDigits: 0 })}`;
+    }
   }
 
   function todayDate() {
@@ -54,6 +58,47 @@
     return `INV-${maxNumber + 1}`;
   }
 
+  function normalizeWorkspace(input) {
+    const fallback = cloneInitialState();
+    const next = {
+      ...fallback,
+      ...input,
+      meta: { ...fallback.meta, ...(input?.meta || {}) },
+      quoteDraft: { ...fallback.quoteDraft, ...(input?.quoteDraft || {}) }
+    };
+    next.customers = Array.isArray(input?.customers) ? input.customers : fallback.customers;
+    next.deals = Array.isArray(input?.deals) ? input.deals : fallback.deals;
+    next.invoices = Array.isArray(input?.invoices) ? input.invoices : fallback.invoices;
+    next.quoteDraft.lineItems = Array.isArray(input?.quoteDraft?.lineItems)
+      ? input.quoteDraft.lineItems
+      : fallback.quoteDraft.lineItems;
+    return next;
+  }
+
+  function downloadText(filename, content, type = "text/plain") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function csvCell(value) {
+    return `"${String(value ?? "").replace(/"/g, '""')}"`;
+  }
+
+  function downloadCsv(filename, headers, rows) {
+    const csv = [
+      headers.map(csvCell).join(","),
+      ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))
+    ].join("\n");
+    downloadText(filename, csv, "text/csv");
+  }
+
   function quoteTotal() {
     return state.quoteDraft.lineItems.reduce((sum, item) => sum + Number(item.qty) * Number(item.price), 0);
   }
@@ -66,6 +111,7 @@
   }
 
   function persist(message) {
+    state.meta.updatedAt = new Date().toISOString();
     storage.save(state);
     if (message) showToast(message);
   }
@@ -373,6 +419,107 @@
     `).join("");
   }
 
+  function renderWorkspaceInfo() {
+    document.getElementById("sidebar-workspace").textContent = state.meta.workspace;
+    document.getElementById("sidebar-location").textContent = state.meta.location;
+  }
+
+  function renderSettings() {
+    setField("workspace-name", state.meta.workspace);
+    setField("workspace-location", state.meta.location);
+    setField("workspace-owner", state.meta.owner);
+    setField("workspace-industry", state.meta.industry);
+    setField("workspace-currency", state.meta.currency);
+    setField("workspace-date", state.meta.today);
+    setField("workspace-note", state.meta.note);
+
+    const updated = state.meta.updatedAt
+      ? new Date(state.meta.updatedAt).toLocaleString()
+      : "Not saved in this browser yet";
+    document.getElementById("data-health").innerHTML = [
+      { label: "Customers", value: state.customers.length },
+      { label: "Deals", value: state.deals.length },
+      { label: "Invoices", value: state.invoices.length },
+      { label: "Last saved", value: updated }
+    ].map((item) => `
+      <article>
+        <span>${item.label}</span>
+        <strong>${item.value}</strong>
+      </article>
+    `).join("");
+  }
+
+  function saveWorkspace(event) {
+    event.preventDefault();
+    state.meta = {
+      ...state.meta,
+      workspace: field("workspace-name").value.trim() || "Collectra workspace",
+      location: field("workspace-location").value.trim() || "Not set",
+      owner: field("workspace-owner").value.trim() || "Owner",
+      industry: field("workspace-industry").value.trim() || "B2B company",
+      currency: field("workspace-currency").value,
+      today: field("workspace-date").value || state.meta.today,
+      note: field("workspace-note").value.trim()
+    };
+    persist("Workspace settings saved");
+    renderAll();
+  }
+
+  function exportWorkspace() {
+    const filename = `${state.meta.workspace.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "collectra"}-workspace.json`;
+    downloadText(filename, JSON.stringify(state, null, 2), "application/json");
+    showToast("Workspace backup exported");
+  }
+
+  function importWorkspace(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      try {
+        const imported = JSON.parse(String(reader.result));
+        state = normalizeWorkspace(imported);
+        persist("Workspace imported");
+        renderAll();
+        generateFollowup(state.invoices[0]?.id);
+        setTab("dashboard");
+      } catch (error) {
+        console.error(error);
+        showToast("Could not import that JSON file");
+      }
+    });
+    reader.readAsText(file);
+  }
+
+  function exportCustomersCsv() {
+    downloadCsv("collectra-customers.csv", ["name", "contact", "email", "phone", "segment", "terms", "notes"], state.customers);
+    showToast("Customers CSV exported");
+  }
+
+  function exportDealsCsv() {
+    const rows = state.deals.map((deal) => ({
+      customer: customerById(deal.customerId).name,
+      title: deal.title,
+      value: deal.value,
+      stage: deal.stage,
+      owner: deal.owner,
+      next: deal.next
+    }));
+    downloadCsv("collectra-deals.csv", ["customer", "title", "value", "stage", "owner", "next"], rows);
+    showToast("Deals CSV exported");
+  }
+
+  function exportInvoicesCsv() {
+    const rows = state.invoices.map((invoice) => ({
+      invoice: invoice.id,
+      customer: customerById(invoice.customerId).name,
+      amount: invoice.amount,
+      due: invoice.due,
+      status: invoiceStatus(invoice).label
+    }));
+    downloadCsv("collectra-invoices.csv", ["invoice", "customer", "amount", "due", "status"], rows);
+    showToast("Invoices CSV exported");
+  }
+
   function buildFollowup(invoice, tone) {
     const customer = customerById(invoice.customerId);
     const days = daysUntil(invoice.due);
@@ -651,7 +798,20 @@
     renderAll();
   }
 
+  function resetDemoData() {
+    storage.clear();
+    state = cloneInitialState();
+    storage.save(state);
+    renderAll();
+    clearCustomerForm();
+    clearDealForm();
+    clearInvoiceForm();
+    generateFollowup("INV-1048");
+    showToast("Demo data reset");
+  }
+
   function renderAll() {
+    renderWorkspaceInfo();
     renderDashboard();
     renderCustomers();
     renderPipeline();
@@ -659,6 +819,7 @@
     renderRecordSelects();
     renderInvoices();
     renderInsights();
+    renderSettings();
   }
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
@@ -685,9 +846,25 @@
   document.getElementById("customer-form").addEventListener("submit", saveCustomer);
   document.getElementById("deal-form").addEventListener("submit", saveDeal);
   document.getElementById("invoice-form").addEventListener("submit", saveInvoice);
+  document.getElementById("workspace-form").addEventListener("submit", saveWorkspace);
   document.getElementById("clear-customer-form").addEventListener("click", clearCustomerForm);
   document.getElementById("clear-deal-form").addEventListener("click", clearDealForm);
   document.getElementById("clear-invoice-form").addEventListener("click", clearInvoiceForm);
+  document.getElementById("export-workspace").addEventListener("click", exportWorkspace);
+  document.getElementById("import-workspace").addEventListener("click", () => {
+    document.getElementById("workspace-import-file").click();
+  });
+  document.getElementById("workspace-import-file").addEventListener("change", (event) => {
+    importWorkspace(event.target.files[0]);
+    event.target.value = "";
+  });
+  document.getElementById("export-customers").addEventListener("click", exportCustomersCsv);
+  document.getElementById("export-deals").addEventListener("click", exportDealsCsv);
+  document.getElementById("export-invoices").addEventListener("click", exportInvoicesCsv);
+  document.getElementById("open-github-pages").addEventListener("click", () => {
+    window.open("https://dhirajnyse.github.io/Collectra/", "_blank", "noopener");
+  });
+  document.getElementById("reset-demo-settings").addEventListener("click", resetDemoData);
 
   document.getElementById("customer-grid").addEventListener("click", (event) => {
     if (event.target.dataset.customerEdit) {
@@ -771,14 +948,7 @@
     generateFollowup(document.getElementById("ai-invoice").value);
   });
 
-  document.getElementById("reset-demo").addEventListener("click", () => {
-    storage.clear();
-    state = cloneInitialState();
-    storage.save(state);
-    renderAll();
-    generateFollowup("INV-1048");
-    showToast("Demo data reset");
-  });
+  document.getElementById("reset-demo").addEventListener("click", resetDemoData);
 
   document.getElementById("global-search").addEventListener("input", (event) => {
     const value = event.target.value.trim().toLowerCase();

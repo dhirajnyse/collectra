@@ -24,6 +24,7 @@ They handle supplier quotes, customer quotations, payment terms, shipping docume
 6. Owner dashboard for expected cash, overdue invoices, and active pipeline
 7. Browser-saved demo workspace for early product testing
 8. Quote and invoice PDF export
+9. Workspace settings, JSON backup/import, and CSV exports
 
 ## Differentiator
 
@@ -42,10 +43,11 @@ Most tools store information. Collectra should move money forward. The AI layer 
 2. Real quote and invoice PDF export
 3. Local data persistence
 4. Create/edit forms for customers, deals, and invoices
-5. Backend API and database
-6. Authentication and workspaces
-7. Email/WhatsApp follow-up sending
-8. Accounting integrations
+5. Workspace backup/import and CSV exports
+6. Backend API and database
+7. Authentication and workspaces
+8. Email/WhatsApp follow-up sending
+9. Accounting integrations
 
 ## North Star Metric
 

@@ -21,6 +21,8 @@ B2B trading, import/export, distributors, and service businesses that already ma
 - Invoice collection board
 - AI follow-up desk
 - Quote and invoice PDF export
+- Workspace settings
+- JSON backup/import and CSV exports
 - Product blueprint in `docs/product-blueprint.md`
 
 ## Project Structure
@@ -34,10 +36,10 @@ B2B trading, import/export, distributors, and service businesses that already ma
 
 ## Next Build Steps
 
-1. Add real create/edit forms for customers, deals, and invoices.
-2. Add authenticated workspaces and a backend database.
-3. Replace demo AI copy with an OpenAI-powered follow-up workflow.
-4. Add email, WhatsApp, and accounting integrations.
+1. Add authenticated workspaces and a backend database.
+2. Replace demo AI copy with an OpenAI-powered follow-up workflow.
+3. Add email, WhatsApp, and accounting integrations.
+4. Add user roles, activity history, and audit trails.
 
 ## GitHub
 
