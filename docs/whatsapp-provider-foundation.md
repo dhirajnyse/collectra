@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v1.4.0 - WhatsApp provider foundation`
+`v3.9.0 - Provider token exchange foundation`
 
 ## Goal
 
@@ -43,6 +43,8 @@ The first supported provider is `whatsapp_cloud`.
 - Loads active workspace WhatsApp settings.
 - Calls WhatsApp Cloud API from the server.
 - Updates the queue to `sent` or `failed`.
+- Schedules recoverable failures for retry automation.
+- Writes the first provider event to `outbound_message_events`.
 - Writes `outbound_message.sent` or `outbound_message.failed` to `audit_logs`.
 
 ## Required Secrets
@@ -83,4 +85,6 @@ supabase functions deploy send-queued-whatsapp
 - WhatsApp sends require active workspace business phone settings.
 - The Edge Function validates workspace membership before sending.
 - Failed provider responses update the queue and audit trail.
+- Failed provider responses set `next_retry_at` for the retry runner.
+- Live delivery webhooks must use `receive-whatsapp-webhook` with Meta challenge and signature verification.
 - Production sending should verify customer opt-in, message-window rules, and approved templates where required.

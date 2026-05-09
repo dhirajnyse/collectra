@@ -20,6 +20,13 @@ function cleanText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function nextRetryAt(retryCount: unknown) {
+  const retryNumber = Number(retryCount);
+  const attempt = Number.isFinite(retryNumber) && retryNumber >= 0 ? retryNumber + 1 : 1;
+  const delayMinutes = Math.min(60, attempt * 15);
+  return new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
+}
+
 function cleanPhone(value: unknown) {
   return cleanText(value).replace(/[^\d]/g, "");
 }
@@ -111,6 +118,10 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Only queued messages can be sent" }, 409);
   }
 
+  if (queuedMessage.review_status !== "approved") {
+    return jsonResponse({ error: "Message must be approved before provider delivery" }, 409);
+  }
+
   const recipient = cleanPhone(queuedMessage.recipient);
   if (!recipient || !cleanText(queuedMessage.message)) {
     return jsonResponse({ error: "Recipient phone and message are required" }, 400);
@@ -162,6 +173,11 @@ Deno.serve(async (request) => {
       .from("outbound_messages")
       .update({
         status: "failed",
+        delivery_status: "failed",
+        delivery_detail: "WhatsApp provider request failed",
+        failed_at: new Date().toISOString(),
+        last_delivery_event_at: new Date().toISOString(),
+        next_retry_at: nextRetryAt(queuedMessage.retry_count),
         metadata: {
           ...(queuedMessage.metadata ?? {}),
           provider: "whatsapp_cloud",
@@ -184,6 +200,19 @@ Deno.serve(async (request) => {
       }
     });
 
+    await supabase.from("outbound_message_events").insert({
+      workspace_id: workspaceId,
+      outbound_message_id: outboundMessageId,
+      provider: "whatsapp_cloud",
+      provider_message_id: cleanText(queuedMessage.provider_message_id),
+      event_type: "whatsapp.failed",
+      delivery_status: "failed",
+      summary: "WhatsApp provider request failed",
+      metadata: {
+        provider_error: providerResult
+      }
+    });
+
     return jsonResponse({ error: "WhatsApp provider request failed", detail: providerResult }, 502);
   }
 
@@ -194,7 +223,10 @@ Deno.serve(async (request) => {
     .from("outbound_messages")
     .update({
       status: "sent",
+      delivery_status: "sent",
+      delivery_detail: "Accepted by WhatsApp Cloud API",
       sent_at: new Date().toISOString(),
+      last_delivery_event_at: new Date().toISOString(),
       provider_message_id: providerMessageId || null,
       metadata: {
         ...(queuedMessage.metadata ?? {}),
@@ -221,6 +253,19 @@ Deno.serve(async (request) => {
     metadata: {
       provider: "whatsapp_cloud",
       provider_message_id: providerMessageId
+    }
+  });
+
+  await supabase.from("outbound_message_events").insert({
+    workspace_id: workspaceId,
+    outbound_message_id: outboundMessageId,
+    provider: "whatsapp_cloud",
+    provider_message_id: providerMessageId || null,
+    event_type: "whatsapp.sent",
+    delivery_status: "sent",
+    summary: "WhatsApp message accepted by provider",
+    metadata: {
+      provider_response: providerResult
     }
   });
 

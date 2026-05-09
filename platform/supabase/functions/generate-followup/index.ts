@@ -101,7 +101,7 @@ Deno.serve(async (request) => {
 
   const { data: invoice, error: invoiceError } = await supabase
     .from("invoices")
-    .select("id, invoice_number, amount, due_date, status, customers(name, contact, email, terms, notes)")
+    .select("id, customer_id, invoice_number, amount, due_date, status, customers(name, contact, email, terms, notes)")
     .eq("workspace_id", workspaceId)
     .eq("id", invoiceId)
     .single();
@@ -111,13 +111,22 @@ Deno.serve(async (request) => {
   }
 
   const customer = Array.isArray(invoice.customers) ? invoice.customers[0] : invoice.customers;
+  const { data: playbook } = await supabase
+    .from("customer_collection_playbooks")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .eq("customer_id", invoice.customer_id)
+    .eq("status", "active")
+    .maybeSingle();
+
   const prompt = [
     "Write a concise B2B payment follow-up draft.",
     "Do not invent payment commitments, bank details, legal threats, discounts, or facts not present here.",
     "Keep the message professional and human. The user must review before sending.",
+    "Use the customer collection playbook when present, but do not disclose internal risk scores or policy names to the customer.",
     "Return only JSON with subject, message, next_action, and risk_note.",
     "",
-    `Tone: ${tone}`,
+    `Requested tone: ${tone}`,
     `Invoice: ${invoice.invoice_number}`,
     `Amount: AED ${Number(invoice.amount ?? 0).toLocaleString("en-US")}`,
     `Due date: ${invoice.due_date ?? "not set"}`,
@@ -125,7 +134,14 @@ Deno.serve(async (request) => {
     `Customer: ${customer?.name ?? "Unknown customer"}`,
     `Contact: ${customer?.contact ?? "Unknown contact"}`,
     `Payment terms: ${customer?.terms ?? "not set"}`,
-    `Notes: ${customer?.notes ?? "none"}`
+    `Notes: ${customer?.notes ?? "none"}`,
+    `Playbook: ${playbook?.playbook_name ?? "none"}`,
+    `Payment behavior: ${playbook?.payment_behavior ?? "not set"}`,
+    `Preferred channel: ${playbook?.preferred_channel ?? "not set"}`,
+    `Playbook tone: ${playbook?.reminder_tone ?? "not set"}`,
+    `Escalation policy: ${playbook?.escalation_policy ?? "not set"}`,
+    `Days before due reminder: ${playbook?.days_before_due ?? "not set"}`,
+    `Playbook notes: ${playbook?.notes ?? "none"}`
   ].join("\n");
 
   const openAiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -173,7 +189,12 @@ Deno.serve(async (request) => {
         subject: draft.subject,
         next_action: draft.next_action,
         risk_note: draft.risk_note,
-        invoice_number: invoice.invoice_number
+        invoice_number: invoice.invoice_number,
+        customer_playbook_id: playbook?.id ?? null,
+        payment_behavior: playbook?.payment_behavior ?? null,
+        preferred_channel: playbook?.preferred_channel ?? null,
+        escalation_policy: playbook?.escalation_policy ?? null,
+        playbook_risk_weight: playbook?.risk_weight ?? null
       }
     })
     .select("*")
@@ -193,7 +214,8 @@ Deno.serve(async (request) => {
     metadata: {
       tone,
       model: openAiModel,
-      invoice_id: invoiceId
+      invoice_id: invoiceId,
+      customer_playbook_id: playbook?.id ?? null
     }
   });
 

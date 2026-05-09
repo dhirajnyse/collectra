@@ -20,6 +20,13 @@ function cleanText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function nextRetryAt(retryCount: unknown) {
+  const retryNumber = Number(retryCount);
+  const attempt = Number.isFinite(retryNumber) && retryNumber >= 0 ? retryNumber + 1 : 1;
+  const delayMinutes = Math.min(60, attempt * 15);
+  return new Date(Date.now() + delayMinutes * 60 * 1000).toISOString();
+}
+
 function buildFrom(settings: Record<string, unknown>) {
   const fromEmail = cleanText(settings.from_email);
   const fromName = cleanText(settings.from_name);
@@ -108,6 +115,10 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Only queued messages can be sent" }, 409);
   }
 
+  if (queuedMessage.review_status !== "approved") {
+    return jsonResponse({ error: "Message must be approved before provider delivery" }, 409);
+  }
+
   if (!cleanText(queuedMessage.recipient) || !cleanText(queuedMessage.message)) {
     return jsonResponse({ error: "Recipient and message are required" }, 400);
   }
@@ -153,6 +164,11 @@ Deno.serve(async (request) => {
       .from("outbound_messages")
       .update({
         status: "failed",
+        delivery_status: "failed",
+        delivery_detail: "Email provider request failed",
+        failed_at: new Date().toISOString(),
+        last_delivery_event_at: new Date().toISOString(),
+        next_retry_at: nextRetryAt(queuedMessage.retry_count),
         metadata: {
           ...(queuedMessage.metadata ?? {}),
           provider: "resend",
@@ -175,6 +191,19 @@ Deno.serve(async (request) => {
       }
     });
 
+    await supabase.from("outbound_message_events").insert({
+      workspace_id: workspaceId,
+      outbound_message_id: outboundMessageId,
+      provider: "resend",
+      provider_message_id: cleanText(queuedMessage.provider_message_id),
+      event_type: "email.failed",
+      delivery_status: "failed",
+      summary: "Email provider request failed",
+      metadata: {
+        provider_error: providerResult
+      }
+    });
+
     return jsonResponse({ error: "Email provider request failed", detail: providerResult }, 502);
   }
 
@@ -183,7 +212,10 @@ Deno.serve(async (request) => {
     .from("outbound_messages")
     .update({
       status: "sent",
+      delivery_status: "sent",
+      delivery_detail: "Accepted by Resend",
       sent_at: new Date().toISOString(),
+      last_delivery_event_at: new Date().toISOString(),
       provider_message_id: providerMessageId || null,
       metadata: {
         ...(queuedMessage.metadata ?? {}),
@@ -210,6 +242,19 @@ Deno.serve(async (request) => {
     metadata: {
       provider: "resend",
       provider_message_id: providerMessageId
+    }
+  });
+
+  await supabase.from("outbound_message_events").insert({
+    workspace_id: workspaceId,
+    outbound_message_id: outboundMessageId,
+    provider: "resend",
+    provider_message_id: providerMessageId || null,
+    event_type: "email.sent",
+    delivery_status: "sent",
+    summary: "Email accepted by provider",
+    metadata: {
+      provider_response: providerResult
     }
   });
 

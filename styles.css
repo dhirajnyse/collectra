@@ -502,6 +502,46 @@ h3 {
   padding: 14px;
 }
 
+.risk-card-top,
+.risk-score-row,
+.risk-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.risk-action-row button {
+  flex: 0 0 auto;
+}
+
+.tracked-note {
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.risk-score-row span {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--teal);
+}
+
+.risk-meter {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf0ee;
+}
+
+.risk-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--gold), var(--red));
+}
+
 .pipeline {
   display: grid;
   grid-template-columns: repeat(4, minmax(220px, 1fr));
@@ -747,6 +787,11 @@ td strong {
   padding: 0 10px;
   font-size: 12px;
   font-weight: 800;
+}
+
+.tiny-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .stacked {

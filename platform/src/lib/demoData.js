@@ -1,4 +1,4 @@
-export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v1.4.0";
+export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v3.9.0";
 
 export const demoMetrics = [
   {
@@ -9,7 +9,7 @@ export const demoMetrics = [
   {
     label: "Database",
     value: "Supabase",
-    note: "RPC seed path ready"
+    note: "Exchange runs ready"
   },
   {
     label: "Auth",
@@ -18,8 +18,8 @@ export const demoMetrics = [
   },
   {
     label: "AI",
-    value: "WhatsApp",
-    note: "Provider boundary"
+    value: "Review",
+    note: "Playbook-aware drafts"
   }
 ];
 
@@ -36,12 +36,12 @@ export const roadmap = [
   },
   {
     status: "Now",
-    title: "WhatsApp provider foundation",
-    detail: "Save business phone settings, then send approved queued WhatsApp messages through a Supabase Edge Function."
+    title: "Provider token exchange foundation",
+    detail: "Record server-side token exchange runs and vault handoffs without storing raw authorization codes or provider tokens in workspace rows."
   },
   {
     status: "After",
     title: "AI money operations",
-    detail: "Add delivery webhooks, summarize collection risk, and rank next actions."
+    detail: "Connect live provider vault storage, scheduled money operations, and richer exception workflows."
   }
 ];

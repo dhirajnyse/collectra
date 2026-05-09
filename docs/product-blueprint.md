@@ -4,7 +4,7 @@
 
 Collectra is a B2B money operations OS: CRM, quotes, invoices, collections, and cash visibility in one workflow.
 
-Current visible version: `v1.4.0 - WhatsApp provider foundation`.
+Current visible version: `v3.9.0 - Provider token exchange foundation`.
 
 ## Positioning
 
@@ -37,6 +37,11 @@ They handle supplier quotes, customer quotations, payment terms, shipping docume
 17. Audited outbound queue for approved follow-up drafts
 18. Workspace email provider settings and server-side queued email sending
 19. Workspace WhatsApp provider settings and server-side queued WhatsApp sending
+20. Delivery status tracking and provider event history for outbound messages
+21. Verified provider webhook receivers for delivery updates
+22. Protected retry automation for recoverable provider failures
+23. Collection risk scoring for open invoice prioritization
+24. Next-best-action recommendations for collection workflow
 
 ## Differentiator
 
@@ -70,7 +75,31 @@ Most tools store information. Collectra should move money forward. The AI layer 
 17. Send queue before email/WhatsApp provider integrations
 18. Email provider integration through server-side Edge Function
 19. WhatsApp provider integration through server-side Edge Function
-20. Delivery-status webhooks and retry history
+20. Delivery status fields and provider event history
+21. Verified delivery webhooks
+22. Retry automation
+23. Collection risk ranking
+24. Next-best-action engine
+25. Action tracking and owner alerts
+26. Escalation cockpit
+27. Team assignment foundation
+28. Owner digest foundation
+29. Digest approval queue
+30. Digest schedule foundation
+31. Digest runner foundation
+32. Owner directory and approval states
+33. Customer collection playbooks
+34. Accounting sync foundation
+35. Bank match foundation
+36. Payment approval foundation
+37. Allocation reversal foundation
+38. Partial payment foundation
+39. Overpayment credit foundation
+40. Multi-invoice split foundation
+41. Provider OAuth preparation
+42. OAuth callback foundation
+43. Credential vault foundation
+44. Provider token exchange foundation
 
 ## North Star Metric
 
