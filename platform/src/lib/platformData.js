@@ -33,11 +33,23 @@ export const demoWorkflow = [
   },
   {
     title: "3. Seed demo data",
-    detail: "A fresh workspace can import the first demo customer, deal, and invoice bundle."
+    detail: "A fresh workspace can import the first demo customer, deal, and invoice bundle through the database RPC."
   },
   {
     title: "4. Collect cash",
     detail: "Finance marks payments, audit logs track changes, and the owner sees risk."
+  },
+  {
+    title: "5. Draft follow-up",
+    detail: "The Edge Function validates workspace access before generating and saving an AI draft."
+  },
+  {
+    title: "6. Queue send",
+    detail: "Approved drafts enter an outbound queue for email, WhatsApp, or manual follow-up."
+  },
+  {
+    title: "7. Send email",
+    detail: "The send Edge Function validates membership and provider settings before calling Resend."
   }
 ];
 
@@ -66,9 +78,15 @@ export const schemaChecklist = [
   "deals",
   "invoices",
   "ai_followups",
+  "outbound_messages",
   "audit_logs",
+  "generate-followup edge function",
+  "send-queued-email edge function",
+  "send queue RLS policies",
+  "workspace_email_settings",
   "workspace bootstrap",
   "demo seed migration",
+  "transactional seed RPC",
   "CRUD service helpers",
   "updated_at triggers",
   "performance indexes",

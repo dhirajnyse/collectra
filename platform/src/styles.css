@@ -148,6 +148,13 @@ p {
   margin-bottom: 16px;
 }
 
+.pilot-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
 .auth-form {
   display: grid;
   gap: 12px;
@@ -160,7 +167,12 @@ p {
   font-weight: 800;
 }
 
-.auth-form input {
+.auth-form input,
+.ai-controls select,
+.queue-controls input,
+.queue-controls select,
+.email-settings-grid input,
+.email-settings-grid select {
   min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -168,7 +180,11 @@ p {
   font: inherit;
 }
 
-.auth-form button {
+.auth-form button,
+.ai-controls button,
+.queue-controls button,
+.email-settings-grid button,
+.review-list button {
   min-height: 42px;
   border: 0;
   border-radius: 8px;
@@ -179,7 +195,12 @@ p {
   cursor: pointer;
 }
 
-.auth-form button:disabled {
+.auth-form button:disabled,
+.ai-controls button:disabled,
+.ai-controls select:disabled,
+.queue-controls button:disabled,
+.email-settings-grid button:disabled,
+.review-list button:disabled {
   cursor: wait;
   opacity: 0.7;
 }
@@ -222,6 +243,183 @@ p {
 
 .auth-message {
   margin: 14px 0 0;
+}
+
+.pilot-panel {
+  min-height: 260px;
+}
+
+.diagnostic-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.diagnostic-list.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.diagnostic-list article {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.diagnostic-list strong,
+.diagnostic-list small {
+  display: block;
+}
+
+.diagnostic-list small {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.check-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(245, 184, 75, 0.16);
+}
+
+.check-dot.ready {
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(15, 143, 120, 0.14);
+}
+
+.connection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.connection-grid span {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--muted);
+}
+
+.connection-grid strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.ai-workspace-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+}
+
+.ai-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(130px, 0.4fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.ai-controls label,
+.queue-controls label,
+.email-settings-grid label {
+  display: grid;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.queue-controls {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.queue-controls button {
+  grid-column: 1 / -1;
+}
+
+.provider-grid {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+.email-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.email-settings-grid button {
+  grid-column: 1 / -1;
+}
+
+.draft-preview {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+}
+
+.draft-preview span {
+  display: block;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.draft-preview p {
+  margin: 12px 0;
+  color: var(--ink);
+}
+
+.draft-preview strong,
+.draft-preview small {
+  display: block;
+}
+
+.draft-preview small {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.followup-list,
+.outbound-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.followup-list article,
+.outbound-list article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.followup-list strong,
+.outbound-list strong {
+  text-transform: capitalize;
+}
+
+.followup-list span,
+.outbound-list span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.followup-list p,
+.outbound-list p {
+  margin: 10px 0 0;
+}
+
+.review-list button {
+  margin-top: 12px;
 }
 
 .workflow-list,
@@ -460,6 +658,7 @@ p {
 
   .metric-grid,
   .workspace-grid,
+  .pilot-grid,
   .data-summary,
   .bundle-grid,
   .audit-list,
@@ -469,6 +668,17 @@ p {
 
   .status-card {
     width: 100%;
+  }
+
+  .connection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-controls,
+  .queue-controls,
+  .email-settings-grid,
+  .diagnostic-list.compact {
+    grid-template-columns: 1fr;
   }
 
   .workspace-list article,

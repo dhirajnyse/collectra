@@ -1,4 +1,4 @@
-export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v0.9.0";
+export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v1.3.0";
 
 export const demoMetrics = [
   {
@@ -9,7 +9,7 @@ export const demoMetrics = [
   {
     label: "Database",
     value: "Supabase",
-    note: "CRUD and seed helpers"
+    note: "RPC seed path ready"
   },
   {
     label: "Auth",
@@ -18,8 +18,8 @@ export const demoMetrics = [
   },
   {
     label: "AI",
-    value: "Queued",
-    note: "Follow-up agent next"
+    value: "Email",
+    note: "Provider boundary"
   }
 ];
 
@@ -32,16 +32,16 @@ export const roadmap = [
   {
     status: "Ready",
     title: "Supabase connection",
-    detail: "Create the project, add credentials, run the schema, and load the first workspace bundle."
+    detail: "Create the project, add credentials, run the schema, and verify the pilot checklist."
   },
   {
     status: "Now",
-    title: "Data migration foundation",
-    detail: "Seed demo customers, deals, and invoices into Supabase, then audit payment updates."
+    title: "Email provider foundation",
+    detail: "Save sender settings, then send approved queued emails through a Supabase Edge Function."
   },
   {
     status: "After",
     title: "AI money operations",
-    detail: "Generate follow-ups, summarize collection risk, and recommend the owner's next best action."
+    detail: "Add WhatsApp sending, summarize collection risk, and rank next actions."
   }
 ];

@@ -2,7 +2,7 @@
 
 This folder is the React/Vite/Supabase foundation for the SaaS version of Collectra.
 
-Current platform version: `v0.9.0 - Data migration foundation`
+Current platform version: `v1.3.0 - Email provider foundation`
 
 The root app remains a static GitHub Pages demo. This platform app is the next build track for login, database persistence, workspace permissions, and real AI workflows.
 
@@ -26,7 +26,22 @@ Copy `.env.example` to `.env.local` and add Supabase credentials when the Supaba
 
 Use `supabase/schema.sql` as the first database draft. It creates workspaces, workspace members, customers, deals, invoices, AI follow-up logs, audit logs, row-level security policies, indexes, and updated-at triggers.
 
-The platform service layer can now create customers, deals, and invoices, seed a fresh workspace with demo data, load a full workspace bundle, and mark invoices paid with audit logging.
+The platform service layer can now create customers, deals, and invoices, seed a fresh workspace with demo data, load a full workspace bundle, and mark invoices paid with audit logging. The preferred seed path is the `seed_demo_workspace` database RPC in `supabase/schema.sql`, with a browser fallback for older local schemas.
+
+The `supabase/functions/generate-followup` Edge Function is the first AI workflow boundary. It validates the signed-in user, checks workspace membership, calls OpenAI from the server, saves the draft to `ai_followups`, and writes an audit event.
+
+Approved follow-up drafts can now be queued into `outbound_messages` for email, WhatsApp, or manual handling. The queue is intentionally not a live sender yet; it is the human approval and audit layer before provider integrations are attached.
+
+Queued email messages can now be sent through the `supabase/functions/send-queued-email` Edge Function. It validates the signed-in user, checks workspace membership, loads active workspace email settings, calls Resend from the server, updates queue status, and writes an audit event.
+
+Set these Supabase Edge Function secrets before deploying it:
+
+```powershell
+supabase secrets set OPENAI_API_KEY=your-openai-key
+supabase secrets set OPENAI_MODEL=your-model
+supabase secrets set EMAIL_PROVIDER=resend
+supabase secrets set RESEND_API_KEY=your-resend-key
+```
 
 ## Security
 
@@ -50,3 +65,7 @@ After credentials are added:
 4. Create a workspace.
 5. Click **Seed demo data** in the live data panel.
 6. Confirm customers, deals, invoices, and audit rows load from Supabase.
+7. Confirm the pilot readiness panel shows the core checks as ready.
+8. Deploy `generate-followup`, then generate a draft from an open invoice.
+9. Queue the approved draft and confirm it appears in outbound review.
+10. Deploy `send-queued-email`, save active sender settings, and send one queued email.

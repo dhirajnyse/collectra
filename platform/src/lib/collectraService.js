@@ -6,6 +6,9 @@ const emptyWorkspaceBundle = {
   customers: [],
   deals: [],
   invoices: [],
+  followups: [],
+  outboundMessages: [],
+  emailSettings: null,
   auditLogs: []
 };
 
@@ -32,6 +35,26 @@ function cleanAmount(value) {
 
 function hasLiveData(bundle) {
   return Boolean(bundle.customers.length || bundle.deals.length || bundle.invoices.length);
+}
+
+function isMissingRpc(error) {
+  return error?.code === "PGRST202" || error?.code === "42883" || String(error?.message ?? "").includes("seed_demo_workspace");
+}
+
+function seedMessage(counts, method) {
+  const customers = counts?.customers ?? 0;
+  const deals = counts?.deals ?? 0;
+  const invoices = counts?.invoices ?? 0;
+  const suffix = method === "database_rpc" ? " using the database RPC." : ".";
+  return `Seeded ${customers} customers, ${deals} deals, and ${invoices} invoices${suffix}`;
+}
+
+function cleanChannel(value) {
+  return ["email", "whatsapp", "manual"].includes(value) ? value : "manual";
+}
+
+function cleanEmailStatus(value) {
+  return ["draft", "active", "disabled"].includes(value) ? value : "draft";
 }
 
 export async function sendMagicLink(email) {
@@ -91,15 +114,18 @@ export async function fetchWorkspaceBundle(workspaceId) {
     return { ...emptyWorkspaceBundle };
   }
 
-  const [workspaceResult, customersResult, dealsResult, invoicesResult, auditLogsResult] = await Promise.all([
+  const [workspaceResult, customersResult, dealsResult, invoicesResult, followupsResult, outboundMessagesResult, emailSettingsResult, auditLogsResult] = await Promise.all([
     supabase.from("workspaces").select("*").eq("id", workspaceId).single(),
     supabase.from("customers").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
     supabase.from("deals").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
     supabase.from("invoices").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
+    supabase.from("ai_followups").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(10),
+    supabase.from("outbound_messages").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(20),
+    supabase.from("workspace_email_settings").select("*").eq("workspace_id", workspaceId).maybeSingle(),
     supabase.from("audit_logs").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(25)
   ]);
 
-  const error = workspaceResult.error || customersResult.error || dealsResult.error || invoicesResult.error || auditLogsResult.error;
+  const error = workspaceResult.error || customersResult.error || dealsResult.error || invoicesResult.error || followupsResult.error || outboundMessagesResult.error || emailSettingsResult.error || auditLogsResult.error;
   if (error) throw error;
 
   return {
@@ -107,7 +133,231 @@ export async function fetchWorkspaceBundle(workspaceId) {
     customers: customersResult.data ?? [],
     deals: dealsResult.data ?? [],
     invoices: invoicesResult.data ?? [],
+    followups: followupsResult.data ?? [],
+    outboundMessages: outboundMessagesResult.data ?? [],
+    emailSettings: emailSettingsResult.data ?? null,
     auditLogs: auditLogsResult.data ?? []
+  };
+}
+
+export async function generateFollowupDraft({ workspaceId, invoiceId, tone = "friendly" }) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !invoiceId) {
+    return {
+      ok: false,
+      message: "Choose a workspace and invoice first."
+    };
+  }
+
+  const { data, error } = await supabase.functions.invoke("generate-followup", {
+    body: {
+      workspaceId,
+      invoiceId,
+      tone
+    }
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message || "AI follow-up function failed."
+    };
+  }
+
+  if (data?.error) {
+    return {
+      ok: false,
+      message: data.error
+    };
+  }
+
+  return {
+    ok: true,
+    followup: data.followup,
+    draft: data.draft,
+    message: "AI follow-up draft generated."
+  };
+}
+
+export async function queueOutboundMessage({
+  workspaceId,
+  followupId = null,
+  invoiceId = null,
+  customerId = null,
+  channel = "manual",
+  recipient = "",
+  subject = "",
+  message = ""
+}) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !message) {
+    return {
+      ok: false,
+      message: "Choose a workspace and message before queueing."
+    };
+  }
+
+  const session = await getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return {
+      ok: false,
+      message: "Sign in before queueing an outbound message."
+    };
+  }
+
+  const payload = {
+    workspace_id: workspaceId,
+    followup_id: followupId,
+    invoice_id: invoiceId,
+    customer_id: customerId,
+    created_by: userId,
+    channel: cleanChannel(channel),
+    recipient: cleanOptionalText(recipient),
+    subject: cleanOptionalText(subject),
+    message: cleanText(message),
+    status: "queued",
+    approved_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from("outbound_messages")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message
+    };
+  }
+
+  const audit = await writeAuditLog({
+    workspaceId,
+    action: "outbound_message.queued",
+    entityType: "outbound_message",
+    entityId: data.id,
+    summary: `${data.channel} follow-up queued for review`,
+    metadata: {
+      followup_id: followupId,
+      invoice_id: invoiceId,
+      channel: data.channel
+    }
+  });
+
+  return {
+    ok: true,
+    outboundMessage: data,
+    audit,
+    message: "Follow-up queued for outbound review."
+  };
+}
+
+export async function saveEmailSettings({
+  workspaceId,
+  provider = "resend",
+  fromName = "",
+  fromEmail = "",
+  replyTo = "",
+  status = "draft"
+}) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !cleanText(fromEmail)) {
+    return {
+      ok: false,
+      message: "Workspace and from email are required."
+    };
+  }
+
+  const session = await getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return {
+      ok: false,
+      message: "Sign in before saving email settings."
+    };
+  }
+
+  const payload = {
+    workspace_id: workspaceId,
+    created_by: userId,
+    provider: provider === "resend" ? "resend" : "resend",
+    from_name: cleanOptionalText(fromName),
+    from_email: cleanText(fromEmail),
+    reply_to: cleanOptionalText(replyTo),
+    status: cleanEmailStatus(status)
+  };
+
+  const { data, error } = await supabase
+    .from("workspace_email_settings")
+    .upsert(payload, { onConflict: "workspace_id" })
+    .select("*")
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message
+    };
+  }
+
+  const audit = await writeAuditLog({
+    workspaceId,
+    action: "email_settings.saved",
+    entityType: "workspace_email_settings",
+    entityId: data.id,
+    summary: "Workspace email settings saved",
+    metadata: {
+      provider: data.provider,
+      status: data.status
+    }
+  });
+
+  return {
+    ok: true,
+    emailSettings: data,
+    audit,
+    message: "Email settings saved."
+  };
+}
+
+export async function sendQueuedEmail({ workspaceId, outboundMessageId }) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !outboundMessageId) {
+    return {
+      ok: false,
+      message: "Choose a queued email first."
+    };
+  }
+
+  const { data, error } = await supabase.functions.invoke("send-queued-email", {
+    body: {
+      workspaceId,
+      outboundMessageId
+    }
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message || "Send email function failed."
+    };
+  }
+
+  if (data?.error) {
+    return {
+      ok: false,
+      message: data.error
+    };
+  }
+
+  return {
+    ok: true,
+    outboundMessage: data.outboundMessage,
+    provider: data.provider,
+    providerMessageId: data.providerMessageId,
+    message: "Queued email sent."
   };
 }
 
@@ -379,6 +629,27 @@ export async function seedDemoWorkspace(workspaceId) {
     return { ok: false, message: "Choose a workspace first." };
   }
 
+  const rpcResult = await supabase.rpc("seed_demo_workspace", {
+    target_workspace_id: workspaceId
+  });
+
+  if (!rpcResult.error) {
+    return {
+      ok: true,
+      counts: rpcResult.data,
+      method: rpcResult.data?.method ?? "database_rpc",
+      message: seedMessage(rpcResult.data, "database_rpc")
+    };
+  }
+
+  if (!isMissingRpc(rpcResult.error)) {
+    return {
+      ok: false,
+      method: "database_rpc",
+      message: rpcResult.error.message
+    };
+  }
+
   const currentBundle = await fetchWorkspaceBundle(workspaceId);
   if (hasLiveData(currentBundle)) {
     return {
@@ -445,7 +716,17 @@ export async function seedDemoWorkspace(workspaceId) {
   return {
     ok: true,
     audit,
-    message: `Seeded ${customers?.length ?? 0} customers, ${deals?.length ?? 0} deals, and ${invoices?.length ?? 0} invoices.`
+    method: "browser_fallback",
+    counts: {
+      customers: customers?.length ?? 0,
+      deals: deals?.length ?? 0,
+      invoices: invoices?.length ?? 0
+    },
+    message: seedMessage({
+      customers: customers?.length ?? 0,
+      deals: deals?.length ?? 0,
+      invoices: invoices?.length ?? 0
+    }, "browser_fallback")
   };
 }
 
