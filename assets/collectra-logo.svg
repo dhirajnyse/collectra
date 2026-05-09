@@ -1,0 +1,10 @@
+<svg width="220" height="64" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Collectra logo</title>
+  <desc id="desc">Collectra wordmark with a routed C mark.</desc>
+  <rect width="64" height="64" rx="14" fill="#16343B"/>
+  <path d="M44 18.5C40.8 15.7 36.6 14 32 14C21.5 14 13 22.5 13 33C13 43.5 21.5 52 32 52C36.8 52 41.2 50.2 44.6 47.2" stroke="#F7F2E8" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M25 33H50" stroke="#4FD1A5" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M42 25L50 33L42 41" stroke="#4FD1A5" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="33" r="4.5" fill="#F5B84B"/>
+  <text x="78" y="39" fill="#16343B" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="0">Collectra</text>
+</svg>
