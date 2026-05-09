@@ -1,5 +1,5 @@
 (() => {
-  const { cloneInitialState, stages, titleMap } = window.CollectraData;
+  const { cloneInitialState, stages, titleMap, appVersion } = window.CollectraData;
   const storage = window.CollectraStorage;
   const pdf = window.CollectraPdf;
 
@@ -58,7 +58,32 @@
     return `INV-${maxNumber + 1}`;
   }
 
+  function isPlainObject(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function safeArray(value, maxItems, name) {
+    if (!Array.isArray(value)) return [];
+    if (value.length > maxItems) {
+      throw new Error(`${name} has too many records`);
+    }
+    return value.filter(isPlainObject);
+  }
+
+  function validateWorkspacePayload(input) {
+    if (!isPlainObject(input)) {
+      throw new Error("Workspace import must be a JSON object");
+    }
+    safeArray(input.customers, 5000, "customers");
+    safeArray(input.deals, 5000, "deals");
+    safeArray(input.invoices, 5000, "invoices");
+    if (input.quoteDraft?.lineItems) {
+      safeArray(input.quoteDraft.lineItems, 250, "quote line items");
+    }
+  }
+
   function normalizeWorkspace(input) {
+    validateWorkspacePayload(input);
     const fallback = cloneInitialState();
     const next = {
       ...fallback,
@@ -88,7 +113,9 @@
   }
 
   function csvCell(value) {
-    return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const raw = String(value ?? "");
+    const neutralized = /^[\s]*[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+    return `"${neutralized.replace(/"/g, '""')}"`;
   }
 
   function downloadCsv(filename, headers, rows) {
@@ -422,6 +449,7 @@
   function renderWorkspaceInfo() {
     document.getElementById("sidebar-workspace").textContent = state.meta.workspace;
     document.getElementById("sidebar-location").textContent = state.meta.location;
+    document.getElementById("version-badge").textContent = `${appVersion.version} - ${appVersion.label}`;
   }
 
   function renderSettings() {

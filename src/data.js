@@ -1,5 +1,9 @@
 window.CollectraData = (() => {
   const today = "2026-05-08";
+  const appVersion = {
+    version: "v0.7.0",
+    label: "Audit foundation"
+  };
 
   const initialState = {
     meta: {
@@ -165,6 +169,7 @@ window.CollectraData = (() => {
   return {
     cloneInitialState,
     stages,
-    titleMap
+    titleMap,
+    appVersion
   };
 })();

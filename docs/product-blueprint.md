@@ -4,6 +4,8 @@
 
 Collectra is a B2B money operations OS: CRM, quotes, invoices, collections, and cash visibility in one workflow.
 
+Current visible version: `v0.7.0 - Audit foundation`.
+
 ## Positioning
 
 For small and mid-sized B2B companies that sell through quotes and payment terms, Collectra helps owners and finance teams collect faster, lose fewer deals, and see expected cash without stitching together WhatsApp, Gmail, Excel, and accounting software.
@@ -25,6 +27,9 @@ They handle supplier quotes, customer quotations, payment terms, shipping docume
 7. Browser-saved demo workspace for early product testing
 8. Quote and invoice PDF export
 9. Workspace settings, JSON backup/import, and CSV exports
+10. React/Vite/Supabase platform scaffold
+11. Security policy, threat model, secure coding checklist, and GitHub security automation
+12. Audit log schema and platform preview for finance-sensitive actions
 
 ## Differentiator
 
@@ -44,10 +49,13 @@ Most tools store information. Collectra should move money forward. The AI layer 
 3. Local data persistence
 4. Create/edit forms for customers, deals, and invoices
 5. Workspace backup/import and CSV exports
-6. Backend API and database
-7. Authentication and workspaces
-8. Email/WhatsApp follow-up sending
-9. Accounting integrations
+6. React/Vite platform scaffold
+7. Backend API and database
+8. Authentication and workspaces
+9. Email/WhatsApp follow-up sending
+10. Accounting integrations
+11. Security automation and release gates
+12. Audit trail and activity feed
 
 ## North Star Metric
 
