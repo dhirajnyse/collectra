@@ -1,6 +1,6 @@
 # Collectra
 
-Current visible version: `v1.3.0 - Email provider foundation`
+Current visible version: `v1.4.0 - WhatsApp provider foundation`
 
 Collectra is a B2B money operations product for small and mid-sized companies that sell through quotes, invoices, payment terms, and follow-ups.
 
@@ -34,6 +34,7 @@ B2B trading, import/export, distributors, and service businesses that already ma
 - Supabase Edge Function scaffold for AI follow-up drafts
 - Outbound message queue for approved email, WhatsApp, and manual follow-ups
 - Email provider settings and server-side queued email send function
+- WhatsApp provider settings and server-side queued WhatsApp send function
 - Product blueprint in `docs/product-blueprint.md`
 
 ## Project Structure
@@ -53,11 +54,13 @@ B2B trading, import/export, distributors, and service businesses that already ma
 3. Deploy the `generate-followup` Edge Function and set AI secrets in Supabase.
 4. Deploy the `send-queued-email` Edge Function and set Resend secrets in Supabase.
 5. Save active sender settings and test one queued email send.
-6. Add WhatsApp provider settings and send function.
+6. Deploy the `send-queued-whatsapp` Edge Function and set WhatsApp Cloud secrets.
+7. Save active WhatsApp business phone settings and test one queued WhatsApp send.
+8. Add provider delivery webhooks and retry history.
 
 ## SaaS Track
 
-See `docs/saas-roadmap.md`, `docs/supabase-setup.md`, `docs/supabase-pilot.md`, `docs/ai-followup-foundation.md`, `docs/send-queue-foundation.md`, `docs/email-provider-foundation.md`, and `platform/README.md` for the React/Vite/Supabase build path.
+See `docs/saas-roadmap.md`, `docs/supabase-setup.md`, `docs/supabase-pilot.md`, `docs/ai-followup-foundation.md`, `docs/send-queue-foundation.md`, `docs/email-provider-foundation.md`, `docs/whatsapp-provider-foundation.md`, and `platform/README.md` for the React/Vite/Supabase build path.
 
 ## Security
 

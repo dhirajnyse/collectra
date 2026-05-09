@@ -2,7 +2,7 @@
 
 ## Current Live Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 The root app is still a static GitHub Pages demo. It now shows the version badge at the top middle so deployments are easy to identify.
 
@@ -88,6 +88,15 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 - Audit events `email_settings.saved`, `outbound_message.sent`, and `outbound_message.failed`
 - Email provider docs in `docs/email-provider-foundation.md`
 
+## v1.4.0 Additions
+
+- `workspace_whatsapp_settings` table for workspace business phone configuration
+- RLS policies for admin-managed WhatsApp provider settings
+- Platform WhatsApp provider settings panel
+- Supabase Edge Function `send-queued-whatsapp` for server-side WhatsApp Cloud sending
+- Audit event `whatsapp_settings.saved`
+- WhatsApp provider docs in `docs/whatsapp-provider-foundation.md`
+
 ## Next Steps
 
 1. Create a Supabase project.
@@ -102,5 +111,7 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 10. Deploy the `generate-followup` Edge Function and set Supabase AI secrets.
 11. Deploy the `send-queued-email` Edge Function and set email provider secrets.
 12. Save active sender settings and send one queued email.
-13. Add WhatsApp provider settings and send function.
-14. Add accounting integrations.
+13. Deploy the `send-queued-whatsapp` Edge Function and set WhatsApp provider secrets.
+14. Save active WhatsApp business phone settings and send one queued WhatsApp message.
+15. Add delivery webhooks and retry history.
+16. Add accounting integrations.

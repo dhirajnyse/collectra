@@ -9,6 +9,7 @@ const emptyWorkspaceBundle = {
   followups: [],
   outboundMessages: [],
   emailSettings: null,
+  whatsappSettings: null,
   auditLogs: []
 };
 
@@ -54,6 +55,10 @@ function cleanChannel(value) {
 }
 
 function cleanEmailStatus(value) {
+  return ["draft", "active", "disabled"].includes(value) ? value : "draft";
+}
+
+function cleanProviderStatus(value) {
   return ["draft", "active", "disabled"].includes(value) ? value : "draft";
 }
 
@@ -114,7 +119,7 @@ export async function fetchWorkspaceBundle(workspaceId) {
     return { ...emptyWorkspaceBundle };
   }
 
-  const [workspaceResult, customersResult, dealsResult, invoicesResult, followupsResult, outboundMessagesResult, emailSettingsResult, auditLogsResult] = await Promise.all([
+  const [workspaceResult, customersResult, dealsResult, invoicesResult, followupsResult, outboundMessagesResult, emailSettingsResult, whatsappSettingsResult, auditLogsResult] = await Promise.all([
     supabase.from("workspaces").select("*").eq("id", workspaceId).single(),
     supabase.from("customers").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
     supabase.from("deals").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
@@ -122,10 +127,11 @@ export async function fetchWorkspaceBundle(workspaceId) {
     supabase.from("ai_followups").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(10),
     supabase.from("outbound_messages").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(20),
     supabase.from("workspace_email_settings").select("*").eq("workspace_id", workspaceId).maybeSingle(),
+    supabase.from("workspace_whatsapp_settings").select("*").eq("workspace_id", workspaceId).maybeSingle(),
     supabase.from("audit_logs").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(25)
   ]);
 
-  const error = workspaceResult.error || customersResult.error || dealsResult.error || invoicesResult.error || followupsResult.error || outboundMessagesResult.error || emailSettingsResult.error || auditLogsResult.error;
+  const error = workspaceResult.error || customersResult.error || dealsResult.error || invoicesResult.error || followupsResult.error || outboundMessagesResult.error || emailSettingsResult.error || whatsappSettingsResult.error || auditLogsResult.error;
   if (error) throw error;
 
   return {
@@ -136,6 +142,7 @@ export async function fetchWorkspaceBundle(workspaceId) {
     followups: followupsResult.data ?? [],
     outboundMessages: outboundMessagesResult.data ?? [],
     emailSettings: emailSettingsResult.data ?? null,
+    whatsappSettings: whatsappSettingsResult.data ?? null,
     auditLogs: auditLogsResult.data ?? []
   };
 }
@@ -358,6 +365,113 @@ export async function sendQueuedEmail({ workspaceId, outboundMessageId }) {
     provider: data.provider,
     providerMessageId: data.providerMessageId,
     message: "Queued email sent."
+  };
+}
+
+export async function saveWhatsAppSettings({
+  workspaceId,
+  provider = "whatsapp_cloud",
+  businessLabel = "",
+  phoneNumberId = "",
+  displayPhone = "",
+  status = "draft"
+}) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !cleanText(phoneNumberId)) {
+    return {
+      ok: false,
+      message: "Workspace and phone number ID are required."
+    };
+  }
+
+  const session = await getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return {
+      ok: false,
+      message: "Sign in before saving WhatsApp settings."
+    };
+  }
+
+  const payload = {
+    workspace_id: workspaceId,
+    created_by: userId,
+    provider: provider === "whatsapp_cloud" ? "whatsapp_cloud" : "whatsapp_cloud",
+    business_label: cleanOptionalText(businessLabel),
+    phone_number_id: cleanText(phoneNumberId),
+    display_phone: cleanOptionalText(displayPhone),
+    status: cleanProviderStatus(status)
+  };
+
+  const { data, error } = await supabase
+    .from("workspace_whatsapp_settings")
+    .upsert(payload, { onConflict: "workspace_id" })
+    .select("*")
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message
+    };
+  }
+
+  const audit = await writeAuditLog({
+    workspaceId,
+    action: "whatsapp_settings.saved",
+    entityType: "workspace_whatsapp_settings",
+    entityId: data.id,
+    summary: "Workspace WhatsApp settings saved",
+    metadata: {
+      provider: data.provider,
+      status: data.status
+    }
+  });
+
+  return {
+    ok: true,
+    whatsappSettings: data,
+    audit,
+    message: "WhatsApp settings saved."
+  };
+}
+
+export async function sendQueuedWhatsApp({ workspaceId, outboundMessageId }) {
+  if (!supabase) return missingSupabaseResult();
+  if (!workspaceId || !outboundMessageId) {
+    return {
+      ok: false,
+      message: "Choose a queued WhatsApp message first."
+    };
+  }
+
+  const { data, error } = await supabase.functions.invoke("send-queued-whatsapp", {
+    body: {
+      workspaceId,
+      outboundMessageId
+    }
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message || "Send WhatsApp function failed."
+    };
+  }
+
+  if (data?.error) {
+    return {
+      ok: false,
+      message: data.error
+    };
+  }
+
+  return {
+    ok: true,
+    outboundMessage: data.outboundMessage,
+    provider: data.provider,
+    providerMessageId: data.providerMessageId,
+    message: "Queued WhatsApp message sent."
   };
 }
 

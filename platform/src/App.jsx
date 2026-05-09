@@ -11,9 +11,11 @@ import {
   markInvoicePaid,
   queueOutboundMessage,
   saveEmailSettings,
+  saveWhatsAppSettings,
   seedDemoWorkspace,
   sendMagicLink,
   sendQueuedEmail,
+  sendQueuedWhatsApp,
   signOut,
   subscribeToAuthChanges
 } from "./lib/collectraService.js";
@@ -72,6 +74,12 @@ export default function App() {
   const [emailStatus, setEmailStatus] = useState("draft");
   const [emailSettingsMessage, setEmailSettingsMessage] = useState("Email provider settings are waiting for a live workspace.");
   const [isSavingEmailSettings, setIsSavingEmailSettings] = useState(false);
+  const [whatsappBusinessLabel, setWhatsappBusinessLabel] = useState("Collectra Finance");
+  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState("");
+  const [whatsappDisplayPhone, setWhatsappDisplayPhone] = useState("");
+  const [whatsappStatus, setWhatsappStatus] = useState("draft");
+  const [whatsappSettingsMessage, setWhatsappSettingsMessage] = useState("WhatsApp provider settings are waiting for a live workspace.");
+  const [isSavingWhatsappSettings, setIsSavingWhatsappSettings] = useState(false);
   const [sendingMessageId, setSendingMessageId] = useState("");
 
   const customerNameById = useMemo(() => {
@@ -146,6 +154,7 @@ export default function App() {
     const hasDraft = Boolean(workspaceBundle?.followups?.length);
     const hasQueued = Boolean(workspaceBundle?.outboundMessages?.length);
     const hasEmailSettings = workspaceBundle?.emailSettings?.status === "active";
+    const hasWhatsAppSettings = workspaceBundle?.whatsappSettings?.status === "active";
 
     return [
       {
@@ -177,6 +186,11 @@ export default function App() {
         label: "Email provider",
         status: checkStatus(hasEmailSettings),
         detail: hasEmailSettings ? "Active sender settings saved" : "Save active email settings"
+      },
+      {
+        label: "WhatsApp provider",
+        status: checkStatus(hasWhatsAppSettings),
+        detail: hasWhatsAppSettings ? "Active phone settings saved" : "Save active WhatsApp settings"
       }
     ];
   }, [aiInvoices.length, selectedWorkspaceId, workspaceBundle]);
@@ -250,6 +264,19 @@ export default function App() {
     setEmailStatus(workspaceBundle.emailSettings.status ?? "draft");
     setEmailSettingsMessage(`Email settings are ${workspaceBundle.emailSettings.status}.`);
   }, [workspaceBundle?.emailSettings]);
+
+  useEffect(() => {
+    if (!workspaceBundle?.whatsappSettings) {
+      setWhatsappStatus("draft");
+      return;
+    }
+
+    setWhatsappBusinessLabel(workspaceBundle.whatsappSettings.business_label ?? "");
+    setWhatsappPhoneNumberId(workspaceBundle.whatsappSettings.phone_number_id ?? "");
+    setWhatsappDisplayPhone(workspaceBundle.whatsappSettings.display_phone ?? "");
+    setWhatsappStatus(workspaceBundle.whatsappSettings.status ?? "draft");
+    setWhatsappSettingsMessage(`WhatsApp settings are ${workspaceBundle.whatsappSettings.status}.`);
+  }, [workspaceBundle?.whatsappSettings]);
 
   async function loadWorkspaces() {
     if (!supabaseStatus.ready) return [];
@@ -477,6 +504,53 @@ export default function App() {
     }
   }
 
+  async function handleSaveWhatsAppSettings() {
+    if (!selectedWorkspaceId) {
+      setWhatsappSettingsMessage("Choose a workspace before saving WhatsApp settings.");
+      return;
+    }
+
+    setIsSavingWhatsappSettings(true);
+    try {
+      const result = await saveWhatsAppSettings({
+        workspaceId: selectedWorkspaceId,
+        provider: "whatsapp_cloud",
+        businessLabel: whatsappBusinessLabel,
+        phoneNumberId: whatsappPhoneNumberId,
+        displayPhone: whatsappDisplayPhone,
+        status: whatsappStatus
+      });
+      setWhatsappSettingsMessage(result.message);
+      if (result.ok) {
+        await loadSelectedWorkspace(selectedWorkspaceId);
+      }
+    } catch (error) {
+      setWhatsappSettingsMessage(error.message);
+    } finally {
+      setIsSavingWhatsappSettings(false);
+    }
+  }
+
+  async function handleSendQueuedWhatsApp(outboundMessageId) {
+    if (!selectedWorkspaceId || !outboundMessageId) return;
+
+    setSendingMessageId(outboundMessageId);
+    try {
+      const result = await sendQueuedWhatsApp({
+        workspaceId: selectedWorkspaceId,
+        outboundMessageId
+      });
+      setQueueMessage(result.message);
+      if (result.ok) {
+        await loadSelectedWorkspace(selectedWorkspaceId);
+      }
+    } catch (error) {
+      setQueueMessage(error.message);
+    } finally {
+      setSendingMessageId("");
+    }
+  }
+
   async function handleSignOut() {
     await signOut();
     setSession(null);
@@ -489,6 +563,8 @@ export default function App() {
     setQueueRecipient("");
     setEmailFromEmail("");
     setEmailReplyTo("");
+    setWhatsappPhoneNumberId("");
+    setWhatsappDisplayPhone("");
   }
 
   return (
@@ -496,17 +572,17 @@ export default function App() {
       <header className="platform-header">
         <div>
           <p className="eyebrow">Collectra Platform</p>
-          <h1>Email provider foundation</h1>
+          <h1>WhatsApp provider foundation</h1>
         </div>
-        <span className="version-pill">{version} - Email provider foundation</span>
+        <span className="version-pill">{version} - WhatsApp provider foundation</span>
       </header>
 
       <section className="hero-panel">
         <div>
           <p className="eyebrow">Next build track</p>
-          <h2>Send approved queued emails through a server boundary</h2>
+          <h2>Send approved queued messages through server boundaries</h2>
           <p>
-            Collectra now has workspace sender settings and a server-side email send function, so approved queued emails can move through a provider without exposing secrets in the browser.
+            Collectra now has workspace sender settings for email and WhatsApp, with provider calls isolated in Supabase Edge Functions so customer follow-ups can move without exposing secrets in the browser.
           </p>
         </div>
         <div className={`status-card ${supabaseStatus.ready ? "ready" : "pending"}`}>
@@ -914,32 +990,85 @@ export default function App() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Outbound review</p>
-              <h2>Queued messages</h2>
+              <p className="eyebrow">WhatsApp provider</p>
+              <h2>Business phone settings</h2>
             </div>
+            <span className="role-pill">{whatsappStatus}</span>
           </div>
-          <div className="outbound-list review-list">
-            {(workspaceBundle?.outboundMessages ?? []).length ? (workspaceBundle?.outboundMessages ?? []).slice(0, 6).map((message) => (
-              <article key={message.id}>
-                <div>
-                  <strong>{message.channel}</strong>
-                  <span>{message.subject || "Outbound follow-up"} - {message.status}</span>
-                </div>
-                <p>{message.recipient || "No recipient saved"}</p>
-                {message.channel === "email" && message.status === "queued" && (
-                  <button type="button" disabled={sendingMessageId === message.id || !session} onClick={() => handleSendQueuedEmail(message.id)}>
-                    {sendingMessageId === message.id ? "Sending..." : "Send email"}
-                  </button>
-                )}
-              </article>
-            )) : (
-              <div className="empty-state">
-                <strong>No queued messages</strong>
-                <span>Approve an AI draft to create the first outbound work item.</span>
-              </div>
-            )}
+          <div className="email-settings-grid">
+            <label>
+              Business label
+              <input
+                value={whatsappBusinessLabel}
+                onChange={(event) => setWhatsappBusinessLabel(event.target.value)}
+                placeholder="Collectra Finance"
+              />
+            </label>
+            <label>
+              Phone number ID
+              <input
+                value={whatsappPhoneNumberId}
+                onChange={(event) => setWhatsappPhoneNumberId(event.target.value)}
+                placeholder="Meta phone number ID"
+              />
+            </label>
+            <label>
+              Display phone
+              <input
+                value={whatsappDisplayPhone}
+                onChange={(event) => setWhatsappDisplayPhone(event.target.value)}
+                placeholder="+971 50 000 1204"
+              />
+            </label>
+            <label>
+              Status
+              <select value={whatsappStatus} onChange={(event) => setWhatsappStatus(event.target.value)}>
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="disabled">Disabled</option>
+              </select>
+            </label>
+            <button type="button" disabled={!selectedWorkspaceId || !whatsappPhoneNumberId || isSavingWhatsappSettings || !session} onClick={handleSaveWhatsAppSettings}>
+              {isSavingWhatsappSettings ? "Saving..." : "Save WhatsApp settings"}
+            </button>
           </div>
+          <p className="auth-message">{whatsappSettingsMessage}</p>
         </section>
+      </section>
+
+      <section className="panel outbound-review-panel">
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">Outbound review</p>
+            <h2>Queued messages</h2>
+          </div>
+        </div>
+        <div className="outbound-list review-list">
+          {(workspaceBundle?.outboundMessages ?? []).length ? (workspaceBundle?.outboundMessages ?? []).slice(0, 8).map((message) => (
+            <article key={message.id}>
+              <div>
+                <strong>{message.channel}</strong>
+                <span>{message.subject || "Outbound follow-up"} - {message.status}</span>
+              </div>
+              <p>{message.recipient || "No recipient saved"}</p>
+              {message.channel === "email" && message.status === "queued" && (
+                <button type="button" disabled={sendingMessageId === message.id || !session} onClick={() => handleSendQueuedEmail(message.id)}>
+                  {sendingMessageId === message.id ? "Sending..." : "Send email"}
+                </button>
+              )}
+              {message.channel === "whatsapp" && message.status === "queued" && (
+                <button type="button" disabled={sendingMessageId === message.id || !session} onClick={() => handleSendQueuedWhatsApp(message.id)}>
+                  {sendingMessageId === message.id ? "Sending..." : "Send WhatsApp"}
+                </button>
+              )}
+            </article>
+          )) : (
+            <div className="empty-state">
+              <strong>No queued messages</strong>
+              <span>Approve an AI draft to create the first outbound work item.</span>
+            </div>
+          )}
+        </div>
       </section>
 
       <section className="workspace-grid">

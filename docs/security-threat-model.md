@@ -15,6 +15,7 @@ Collectra manages B2B money operations:
 - AI-generated follow-up drafts
 - Outbound message queue
 - Email provider settings
+- WhatsApp provider settings
 - Workspace membership
 - Audit logs
 
@@ -29,11 +30,13 @@ Collectra manages B2B money operations:
 | AI follow-ups | Medium/High | May contain customer and invoice data |
 | Outbound messages | High | Customer communication content and recipients |
 | Email provider settings | High | Sender identity, reply routing, and provider metadata |
+| WhatsApp provider settings | High | Business phone identity and provider metadata |
 | Audit logs | High | Finance and security activity history |
 | Supabase anon key | Public with RLS | Safe only with correct RLS |
 | Supabase service key | Critical secret | Never in browser or Git |
 | OpenAI API key | Critical secret | Supabase Edge Function secret only |
 | Email provider API key | Critical secret | Supabase Edge Function secret only |
+| WhatsApp provider API key | Critical secret | Supabase Edge Function secret only |
 
 ## Actors
 
@@ -52,8 +55,9 @@ Collectra manages B2B money operations:
 3. Browser to Supabase Edge Functions
 4. Edge Functions to OpenAI
 5. Edge Functions to email provider
-6. Local exports from app to user machine
-7. GitHub repository and deployment pipeline
+6. Edge Functions to WhatsApp provider
+7. Local exports from app to user machine
+8. GitHub repository and deployment pipeline
 
 ## Main Risks
 
@@ -68,8 +72,10 @@ Collectra manages B2B money operations:
 | AI prompt injection | Treat AI as draft generator, constrain data scope, validate workspace membership before prompts |
 | AI secret leakage | Keep OpenAI keys in Edge Function secrets, never Vite variables |
 | Email provider secret leakage | Keep provider keys in Edge Function secrets, never Vite variables |
+| WhatsApp provider secret leakage | Keep provider keys in Edge Function secrets, never Vite variables |
 | Accidental customer send | Queue approved drafts first; provider integrations require explicit send actions |
 | Unauthorized provider send | Validate workspace membership in Edge Functions before sending |
+| WhatsApp compliance risk | Verify customer opt-in and provider message-window rules before production sending |
 | Unauthorized destructive actions | Role checks and append-only audit logs |
 | CSV formula injection | Escape exported values and neutralize formulas |
 
@@ -83,4 +89,5 @@ Collectra manages B2B money operations:
 6. Wire app actions to audit logging.
 7. Add AI follow-up generation through a Supabase Edge Function.
 8. Add email provider sending through a Supabase Edge Function.
-9. Run automated security checks on every GitHub push.
+9. Add WhatsApp provider sending through a Supabase Edge Function.
+10. Run automated security checks on every GitHub push.

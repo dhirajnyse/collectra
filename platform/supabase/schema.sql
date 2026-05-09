@@ -110,6 +110,21 @@ create table if not exists public.workspace_email_settings (
   unique (workspace_id)
 );
 
+create table if not exists public.workspace_whatsapp_settings (
+  id uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+  created_by uuid references auth.users(id) on delete set null,
+  provider text not null default 'whatsapp_cloud' check (provider in ('whatsapp_cloud')),
+  business_label text,
+  phone_number_id text not null,
+  display_phone text,
+  status text not null default 'draft' check (status in ('draft', 'active', 'disabled')),
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (workspace_id)
+);
+
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
@@ -163,6 +178,11 @@ create trigger set_workspace_email_settings_updated_at
 before update on public.workspace_email_settings
 for each row execute function public.set_updated_at();
 
+drop trigger if exists set_workspace_whatsapp_settings_updated_at on public.workspace_whatsapp_settings;
+create trigger set_workspace_whatsapp_settings_updated_at
+before update on public.workspace_whatsapp_settings
+for each row execute function public.set_updated_at();
+
 create index if not exists idx_workspace_members_user_id on public.workspace_members(user_id);
 create index if not exists idx_customers_workspace_id on public.customers(workspace_id);
 create index if not exists idx_deals_workspace_id on public.deals(workspace_id);
@@ -176,6 +196,7 @@ create index if not exists idx_outbound_messages_workspace_created_at on public.
 create index if not exists idx_outbound_messages_status on public.outbound_messages(status);
 create index if not exists idx_outbound_messages_invoice_id on public.outbound_messages(invoice_id);
 create index if not exists idx_workspace_email_settings_workspace_id on public.workspace_email_settings(workspace_id);
+create index if not exists idx_workspace_whatsapp_settings_workspace_id on public.workspace_whatsapp_settings(workspace_id);
 create index if not exists idx_audit_logs_workspace_created_at on public.audit_logs(workspace_id, created_at desc);
 
 create or replace function public.is_workspace_member(target_workspace_id uuid)
@@ -314,6 +335,7 @@ alter table public.invoices enable row level security;
 alter table public.ai_followups enable row level security;
 alter table public.outbound_messages enable row level security;
 alter table public.workspace_email_settings enable row level security;
+alter table public.workspace_whatsapp_settings enable row level security;
 alter table public.audit_logs enable row level security;
 
 drop policy if exists "workspace members can read workspaces" on public.workspaces;
@@ -502,6 +524,28 @@ with check (
 drop policy if exists "admins can update workspace email settings" on public.workspace_email_settings;
 create policy "admins can update workspace email settings"
 on public.workspace_email_settings
+for update
+using (public.can_manage_workspace(workspace_id))
+with check (public.can_manage_workspace(workspace_id));
+
+drop policy if exists "members can read workspace whatsapp settings" on public.workspace_whatsapp_settings;
+create policy "members can read workspace whatsapp settings"
+on public.workspace_whatsapp_settings
+for select
+using (public.is_workspace_member(workspace_id));
+
+drop policy if exists "admins can write workspace whatsapp settings" on public.workspace_whatsapp_settings;
+create policy "admins can write workspace whatsapp settings"
+on public.workspace_whatsapp_settings
+for insert
+with check (
+  public.can_manage_workspace(workspace_id)
+  and created_by = auth.uid()
+);
+
+drop policy if exists "admins can update workspace whatsapp settings" on public.workspace_whatsapp_settings;
+create policy "admins can update workspace whatsapp settings"
+on public.workspace_whatsapp_settings
 for update
 using (public.can_manage_workspace(workspace_id))
 with check (public.can_manage_workspace(workspace_id));

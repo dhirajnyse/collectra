@@ -1,8 +1,8 @@
 window.CollectraData = (() => {
   const today = "2026-05-08";
   const appVersion = {
-    version: "v1.3.0",
-    label: "Email provider foundation"
+    version: "v1.4.0",
+    label: "WhatsApp provider foundation"
   };
 
   const initialState = {

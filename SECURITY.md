@@ -6,8 +6,8 @@ Collectra is currently an early-stage product. The public GitHub Pages app is a 
 
 | Version | Status |
 | --- | --- |
-| v1.3.x | Active development |
-| v1.2.x and earlier | Prototype history |
+| v1.4.x | Active development |
+| v1.3.x and earlier | Prototype history |
 
 ## Reporting a Vulnerability
 
@@ -37,9 +37,10 @@ Collectra handles business contact, deal, invoice, payment, and AI-generated fol
 
 - Static demo: browser-only prototype using `localStorage`
 - Platform scaffold: React/Vite/Supabase-ready
-- Database draft: workspace membership, transactional demo seed RPC, AI follow-up history, outbound message queue, workspace email settings, audit logs, plus row-level security policies
+- Database draft: workspace membership, transactional demo seed RPC, AI follow-up history, outbound message queue, workspace email and WhatsApp settings, audit logs, plus row-level security policies
 - AI workflow: Edge Function boundary for OpenAI calls with workspace membership validation
 - Email workflow: Edge Function boundary for Resend calls with workspace membership validation and audit logging
+- WhatsApp workflow: Edge Function boundary for WhatsApp Cloud calls with workspace membership validation and audit logging
 - Automation: GitHub dependency audit and CodeQL workflows added
 
 ## Secrets
@@ -49,6 +50,7 @@ Never commit:
 - Supabase service-role keys
 - OpenAI API keys
 - Email provider API keys
+- WhatsApp provider API keys
 - Production database credentials
 - Customer exports
 - Queued outbound message exports

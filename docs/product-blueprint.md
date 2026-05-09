@@ -4,7 +4,7 @@
 
 Collectra is a B2B money operations OS: CRM, quotes, invoices, collections, and cash visibility in one workflow.
 
-Current visible version: `v1.3.0 - Email provider foundation`.
+Current visible version: `v1.4.0 - WhatsApp provider foundation`.
 
 ## Positioning
 
@@ -36,6 +36,7 @@ They handle supplier quotes, customer quotations, payment terms, shipping docume
 16. Server-side AI follow-up generation scaffold with audit logging
 17. Audited outbound queue for approved follow-up drafts
 18. Workspace email provider settings and server-side queued email sending
+19. Workspace WhatsApp provider settings and server-side queued WhatsApp sending
 
 ## Differentiator
 
@@ -68,7 +69,8 @@ Most tools store information. Collectra should move money forward. The AI layer 
 16. Edge Function AI follow-up drafts
 17. Send queue before email/WhatsApp provider integrations
 18. Email provider integration through server-side Edge Function
-19. WhatsApp provider integration and delivery-status history
+19. WhatsApp provider integration through server-side Edge Function
+20. Delivery-status webhooks and retry history
 
 ## North Star Metric
 

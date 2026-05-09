@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 ## Goal
 

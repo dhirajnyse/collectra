@@ -2,7 +2,7 @@
 
 This folder is the React/Vite/Supabase foundation for the SaaS version of Collectra.
 
-Current platform version: `v1.3.0 - Email provider foundation`
+Current platform version: `v1.4.0 - WhatsApp provider foundation`
 
 The root app remains a static GitHub Pages demo. This platform app is the next build track for login, database persistence, workspace permissions, and real AI workflows.
 
@@ -24,7 +24,7 @@ Copy `.env.example` to `.env.local` and add Supabase credentials when the Supaba
 
 ## Supabase
 
-Use `supabase/schema.sql` as the first database draft. It creates workspaces, workspace members, customers, deals, invoices, AI follow-up logs, audit logs, row-level security policies, indexes, and updated-at triggers.
+Use `supabase/schema.sql` as the first database draft. It creates workspaces, workspace members, customers, deals, invoices, AI follow-up logs, outbound messages, provider settings, audit logs, row-level security policies, indexes, and updated-at triggers.
 
 The platform service layer can now create customers, deals, and invoices, seed a fresh workspace with demo data, load a full workspace bundle, and mark invoices paid with audit logging. The preferred seed path is the `seed_demo_workspace` database RPC in `supabase/schema.sql`, with a browser fallback for older local schemas.
 
@@ -34,6 +34,8 @@ Approved follow-up drafts can now be queued into `outbound_messages` for email, 
 
 Queued email messages can now be sent through the `supabase/functions/send-queued-email` Edge Function. It validates the signed-in user, checks workspace membership, loads active workspace email settings, calls Resend from the server, updates queue status, and writes an audit event.
 
+Queued WhatsApp messages can now be sent through the `supabase/functions/send-queued-whatsapp` Edge Function. It validates the signed-in user, checks workspace membership, loads active workspace WhatsApp settings, calls WhatsApp Cloud API from the server, updates queue status, and writes an audit event.
+
 Set these Supabase Edge Function secrets before deploying it:
 
 ```powershell
@@ -41,6 +43,9 @@ supabase secrets set OPENAI_API_KEY=your-openai-key
 supabase secrets set OPENAI_MODEL=your-model
 supabase secrets set EMAIL_PROVIDER=resend
 supabase secrets set RESEND_API_KEY=your-resend-key
+supabase secrets set WHATSAPP_PROVIDER=whatsapp_cloud
+supabase secrets set WHATSAPP_ACCESS_TOKEN=your-whatsapp-cloud-token
+supabase secrets set WHATSAPP_GRAPH_API_VERSION=your-current-graph-api-version
 ```
 
 ## Security
@@ -69,3 +74,4 @@ After credentials are added:
 8. Deploy `generate-followup`, then generate a draft from an open invoice.
 9. Queue the approved draft and confirm it appears in outbound review.
 10. Deploy `send-queued-email`, save active sender settings, and send one queued email.
+11. Deploy `send-queued-whatsapp`, save active WhatsApp settings, and send one queued WhatsApp message.

@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 ## Goal
 
@@ -49,6 +49,7 @@ supabase functions deploy generate-followup
 10. Confirm `ai_followup.generated` appears in the audit trail.
 11. Queue the approved draft for outbound review.
 12. Send the queued email through `send-queued-email` after sender settings are active.
+13. Send the queued WhatsApp message through `send-queued-whatsapp` after business phone settings are active.
 
 ## Guardrails
 

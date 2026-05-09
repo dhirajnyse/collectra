@@ -1,4 +1,4 @@
-export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v1.3.0";
+export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v1.4.0";
 
 export const demoMetrics = [
   {
@@ -18,7 +18,7 @@ export const demoMetrics = [
   },
   {
     label: "AI",
-    value: "Email",
+    value: "WhatsApp",
     note: "Provider boundary"
   }
 ];
@@ -36,12 +36,12 @@ export const roadmap = [
   },
   {
     status: "Now",
-    title: "Email provider foundation",
-    detail: "Save sender settings, then send approved queued emails through a Supabase Edge Function."
+    title: "WhatsApp provider foundation",
+    detail: "Save business phone settings, then send approved queued WhatsApp messages through a Supabase Edge Function."
   },
   {
     status: "After",
     title: "AI money operations",
-    detail: "Add WhatsApp sending, summarize collection risk, and rank next actions."
+    detail: "Add delivery webhooks, summarize collection risk, and rank next actions."
   }
 ];

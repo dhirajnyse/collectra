@@ -2,11 +2,11 @@
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 ## Goal
 
-Prove the first live Collectra SaaS loop with real Supabase auth, workspace isolation, seeded finance records, audited payment updates, AI drafts, outbound approvals, and explicit email sending.
+Prove the first live Collectra SaaS loop with real Supabase auth, workspace isolation, seeded finance records, audited payment updates, AI drafts, outbound approvals, and explicit provider sending.
 
 ## Pilot Path
 
@@ -31,6 +31,10 @@ Prove the first live Collectra SaaS loop with real Supabase auth, workspace isol
 19. Save active workspace email sender settings.
 20. Send one queued email message.
 21. Confirm the audit trail shows `outbound_message.sent` or `outbound_message.failed`.
+22. Deploy the `send-queued-whatsapp` Edge Function.
+23. Save active workspace WhatsApp business phone settings.
+24. Send one queued WhatsApp message.
+25. Confirm the queue and audit trail record the send result.
 
 ## Acceptance Criteria
 
@@ -46,6 +50,8 @@ Prove the first live Collectra SaaS loop with real Supabase auth, workspace isol
 - An approved draft can be queued in `outbound_messages` without sending automatically.
 - Email provider settings are workspace-scoped and admin-managed.
 - `send-queued-email` validates workspace membership before contacting Resend.
+- WhatsApp provider settings are workspace-scoped and admin-managed.
+- `send-queued-whatsapp` validates workspace membership before contacting WhatsApp Cloud API.
 - Sent and failed provider attempts update the outbound queue and audit log.
 - `npm run security:audit` reports zero moderate-or-higher vulnerabilities.
 - `npm run build` passes.
@@ -60,5 +66,6 @@ Prove the first live Collectra SaaS loop with real Supabase auth, workspace isol
 - Treat queued outbound messages as sensitive customer communications.
 - Keep provider API keys in Supabase Edge Function secrets only.
 - Require explicit user action before sending a queued provider message.
+- Verify customer opt-in and WhatsApp template/window rules before production use.
 - Treat the browser fallback seed path as a development convenience only.
 - Before onboarding real customer data, add production logging, backups, and a private vulnerability reporting channel.

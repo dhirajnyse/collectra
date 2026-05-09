@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 ## Goal
 
@@ -43,13 +43,16 @@ Collection follow-ups are sensitive customer communications. Collectra should no
 - Current statuses: `queued`, `sent`, `failed`, `cancelled`
 - v1.2.0 queues approved drafts only; it does not send them.
 - v1.3.0 adds an explicit email send action through a server-side provider function.
+- v1.4.0 adds an explicit WhatsApp send action through a server-side provider function.
 - Queue actions write `outbound_message.queued` to the audit log.
 - Email provider attempts write `outbound_message.sent` or `outbound_message.failed` to the audit log.
+- WhatsApp provider attempts write `outbound_message.sent` or `outbound_message.failed` to the audit log.
 
 ## Provider Work
 
 1. Email uses workspace sender settings plus `send-queued-email`.
-2. Email sending is locked behind explicit user action.
-3. Queue status updates to `sent` or `failed`.
-4. Provider message IDs are stored without storing provider secrets.
-5. WhatsApp provider settings and delivery history are next.
+2. WhatsApp uses workspace business phone settings plus `send-queued-whatsapp`.
+3. Provider sending is locked behind explicit user action.
+4. Queue status updates to `sent` or `failed`.
+5. Provider message IDs are stored without storing provider secrets.
+6. Delivery webhooks and retry history are next.

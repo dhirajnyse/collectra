@@ -50,6 +50,10 @@ export const demoWorkflow = [
   {
     title: "7. Send email",
     detail: "The send Edge Function validates membership and provider settings before calling Resend."
+  },
+  {
+    title: "8. Send WhatsApp",
+    detail: "The send Edge Function validates membership and business phone settings before calling WhatsApp Cloud API."
   }
 ];
 
@@ -82,8 +86,10 @@ export const schemaChecklist = [
   "audit_logs",
   "generate-followup edge function",
   "send-queued-email edge function",
+  "send-queued-whatsapp edge function",
   "send queue RLS policies",
   "workspace_email_settings",
+  "workspace_whatsapp_settings",
   "workspace bootstrap",
   "demo seed migration",
   "transactional seed RPC",

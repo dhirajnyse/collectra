@@ -24,7 +24,7 @@ Use this checklist before every release candidate.
 - Treat queued outbound messages and recipients as sensitive customer communications.
 - Keep `.env.local` out of Git.
 - Keep OpenAI and Supabase service-role keys in server-side secrets only.
-- Keep email provider API keys in Supabase Edge Function secrets only.
+- Keep email and WhatsApp provider API keys in Supabase Edge Function secrets only.
 - Avoid logging customer data, tokens, or full AI prompts in browser console.
 - Exported JSON and CSV files are user-owned sensitive data.
 - Audit invoice/payment/customer changes.
@@ -48,6 +48,7 @@ Use this checklist before every release candidate.
 - Audit every queued outbound message.
 - Audit every provider send attempt as sent or failed.
 - Require explicit user action before provider sending.
+- Verify WhatsApp customer opt-in and provider message-window rules before production sending.
 - Add prompt-injection tests before connecting email or WhatsApp sending.
 - Log AI-generated follow-ups with user, invoice, and timestamp.
 

@@ -11,9 +11,9 @@ B2B finance software needs traceability. Collectra should record important actio
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
-The Supabase schema includes `audit_logs`, the platform service layer has a `writeAuditLog` helper, the AI Edge Function writes `ai_followup.generated` after saving a draft, the outbound approval flow writes `outbound_message.queued`, and the email provider flow writes sender and send-result events.
+The Supabase schema includes `audit_logs`, the platform service layer has a `writeAuditLog` helper, the AI Edge Function writes `ai_followup.generated` after saving a draft, the outbound approval flow writes `outbound_message.queued`, and provider flows write settings plus send-result events.
 
 ## Audit Table
 
@@ -43,6 +43,7 @@ Start with:
 - `ai_followup.generated`
 - `outbound_message.queued`
 - `email_settings.saved`
+- `whatsapp_settings.saved`
 - `outbound_message.sent`
 - `outbound_message.failed`
 - `member.invited`

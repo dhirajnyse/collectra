@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v1.3.0 - Email provider foundation`
+`v1.4.0 - WhatsApp provider foundation`
 
 ## Create The Project
 
@@ -23,7 +23,7 @@ Use:
 ```text
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
-VITE_COLLECTRA_VERSION=v1.3.0
+VITE_COLLECTRA_VERSION=v1.4.0
 ```
 
 Do not commit `.env.local`.
@@ -52,6 +52,9 @@ Test:
 12. Deploy the `send-queued-email` Edge Function.
 13. Save active sender settings in **Email provider**.
 14. Send one queued email and confirm the queue status changes.
+15. Deploy the `send-queued-whatsapp` Edge Function.
+16. Save active business phone settings in **WhatsApp provider**.
+17. Send one queued WhatsApp message and confirm the queue status changes.
 
 ## Migration Notes
 
@@ -61,7 +64,8 @@ Test:
 - Production bulk imports should keep using RPC or Edge Function boundaries so multi-table writes stay transactional.
 - Set `OPENAI_API_KEY` and `OPENAI_MODEL` as Supabase Edge Function secrets, never as Vite browser variables.
 - Set `EMAIL_PROVIDER` and `RESEND_API_KEY` as Supabase Edge Function secrets before testing live email.
-- Do not connect production sender domains until queued message approvals, audit logs, and sender verification are complete.
+- Set `WHATSAPP_PROVIDER`, `WHATSAPP_ACCESS_TOKEN`, and `WHATSAPP_GRAPH_API_VERSION` as Supabase Edge Function secrets before testing live WhatsApp.
+- Do not connect production sender domains or WhatsApp business phones until queued message approvals, audit logs, and sender verification are complete.
 
 ## Security Expectations
 
