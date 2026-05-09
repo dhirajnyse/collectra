@@ -2,7 +2,7 @@
 
 ## Current Live Version
 
-`v0.9.0 - Data migration foundation`
+`v1.3.0 - Email provider foundation`
 
 The root app is still a static GitHub Pages demo. It now shows the version badge at the top middle so deployments are easy to identify.
 
@@ -55,6 +55,39 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 - Invoice **Mark paid** action with audit logging
 - Platform docs updated for seed/load verification
 
+## v1.0.0 Additions
+
+- Live pilot readiness panel in the platform app
+- Connection diagnostics for credentials, session, workspace, live data, audit trail, and payment writes
+- Transactional `seed_demo_workspace` Supabase RPC
+- Browser seed fallback for older local schemas
+- Supabase pilot runbook in `docs/supabase-pilot.md`
+
+## v1.1.0 Additions
+
+- Supabase Edge Function scaffold for `generate-followup`
+- Server-side OpenAI call path with workspace membership validation
+- `ai_followups` schema expansion for model, metadata, and creator tracking
+- Platform AI Desk panel for invoice tone selection and draft previews
+- AI follow-up runbook in `docs/ai-followup-foundation.md`
+
+## v1.2.0 Additions
+
+- `outbound_messages` table for approved follow-up work items
+- RLS policies for queued outbound messages
+- Platform queue controls for email, WhatsApp, and manual follow-up
+- Audit event `outbound_message.queued`
+- Send queue docs in `docs/send-queue-foundation.md`
+
+## v1.3.0 Additions
+
+- `workspace_email_settings` table for workspace sender configuration
+- RLS policies for admin-managed email provider settings
+- Platform email provider settings panel
+- Supabase Edge Function `send-queued-email` for server-side Resend sending
+- Audit events `email_settings.saved`, `outbound_message.sent`, and `outbound_message.failed`
+- Email provider docs in `docs/email-provider-foundation.md`
+
 ## Next Steps
 
 1. Create a Supabase project.
@@ -64,7 +97,10 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 5. Run the platform app locally with `npm install` and `npm run dev`.
 6. Test magic-link login locally.
 7. Create a workspace after first login.
-8. Seed demo customers, deals, and invoices into Supabase.
+8. Seed demo customers, deals, and invoices into Supabase through the RPC.
 9. Load the workspace bundle and test marking an invoice paid.
-10. Add OpenAI-powered follow-up generation.
-11. Add email/WhatsApp send actions and accounting integrations.
+10. Deploy the `generate-followup` Edge Function and set Supabase AI secrets.
+11. Deploy the `send-queued-email` Edge Function and set email provider secrets.
+12. Save active sender settings and send one queued email.
+13. Add WhatsApp provider settings and send function.
+14. Add accounting integrations.

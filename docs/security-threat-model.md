@@ -13,6 +13,8 @@ Collectra manages B2B money operations:
 - Invoices
 - Payment status
 - AI-generated follow-up drafts
+- Outbound message queue
+- Email provider settings
 - Workspace membership
 - Audit logs
 
@@ -25,9 +27,13 @@ Collectra manages B2B money operations:
 | Invoices | High | Amounts, due dates, and collection status |
 | Workspace membership | High | Controls data visibility |
 | AI follow-ups | Medium/High | May contain customer and invoice data |
+| Outbound messages | High | Customer communication content and recipients |
+| Email provider settings | High | Sender identity, reply routing, and provider metadata |
 | Audit logs | High | Finance and security activity history |
 | Supabase anon key | Public with RLS | Safe only with correct RLS |
 | Supabase service key | Critical secret | Never in browser or Git |
+| OpenAI API key | Critical secret | Supabase Edge Function secret only |
+| Email provider API key | Critical secret | Supabase Edge Function secret only |
 
 ## Actors
 
@@ -43,9 +49,11 @@ Collectra manages B2B money operations:
 
 1. Browser to Supabase Auth
 2. Browser to Supabase database API
-3. Browser to future AI/backend functions
-4. Local exports from app to user machine
-5. GitHub repository and deployment pipeline
+3. Browser to Supabase Edge Functions
+4. Edge Functions to OpenAI
+5. Edge Functions to email provider
+6. Local exports from app to user machine
+7. GitHub repository and deployment pipeline
 
 ## Main Risks
 
@@ -57,7 +65,11 @@ Collectra manages B2B money operations:
 | Injection | Parameterized Supabase queries, no SQL from user input |
 | Secret leakage | `.gitignore`, secret scanning, no service key in frontend |
 | Dependency compromise | Dependabot, npm audit, CodeQL |
-| AI prompt injection | Treat AI as draft generator, constrain data scope |
+| AI prompt injection | Treat AI as draft generator, constrain data scope, validate workspace membership before prompts |
+| AI secret leakage | Keep OpenAI keys in Edge Function secrets, never Vite variables |
+| Email provider secret leakage | Keep provider keys in Edge Function secrets, never Vite variables |
+| Accidental customer send | Queue approved drafts first; provider integrations require explicit send actions |
+| Unauthorized provider send | Validate workspace membership in Edge Functions before sending |
 | Unauthorized destructive actions | Role checks and append-only audit logs |
 | CSV formula injection | Escape exported values and neutralize formulas |
 
@@ -69,5 +81,6 @@ Collectra manages B2B money operations:
 4. Migrate from `localStorage` to Supabase.
 5. Add audit log table for sensitive changes.
 6. Wire app actions to audit logging.
-7. Add AI follow-up generation through a backend function.
-8. Run automated security checks on every GitHub push.
+7. Add AI follow-up generation through a Supabase Edge Function.
+8. Add email provider sending through a Supabase Edge Function.
+9. Run automated security checks on every GitHub push.

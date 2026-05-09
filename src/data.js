@@ -1,8 +1,8 @@
 window.CollectraData = (() => {
   const today = "2026-05-08";
   const appVersion = {
-    version: "v0.9.0",
-    label: "Data migration foundation"
+    version: "v1.3.0",
+    label: "Email provider foundation"
   };
 
   const initialState = {

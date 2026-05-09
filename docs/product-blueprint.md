@@ -4,7 +4,7 @@
 
 Collectra is a B2B money operations OS: CRM, quotes, invoices, collections, and cash visibility in one workflow.
 
-Current visible version: `v0.9.0 - Data migration foundation`.
+Current visible version: `v1.3.0 - Email provider foundation`.
 
 ## Positioning
 
@@ -32,6 +32,10 @@ They handle supplier quotes, customer quotations, payment terms, shipping docume
 12. Audit log schema and platform preview for finance-sensitive actions
 13. Supabase session detection and workspace bootstrap flow
 14. Supabase CRUD helpers and demo data seed flow for migration testing
+15. Live Supabase pilot readiness diagnostics and transactional seed RPC
+16. Server-side AI follow-up generation scaffold with audit logging
+17. Audited outbound queue for approved follow-up drafts
+18. Workspace email provider settings and server-side queued email sending
 
 ## Differentiator
 
@@ -60,6 +64,11 @@ Most tools store information. Collectra should move money forward. The AI layer 
 12. Audit trail and activity feed
 13. Live Supabase workspace onboarding
 14. Data migration, seed loading, and payment-status writes
+15. Live pilot verification before AI workflows
+16. Edge Function AI follow-up drafts
+17. Send queue before email/WhatsApp provider integrations
+18. Email provider integration through server-side Edge Function
+19. WhatsApp provider integration and delivery-status history
 
 ## North Star Metric
 

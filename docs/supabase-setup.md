@@ -2,7 +2,7 @@
 
 ## Current Version
 
-`v0.9.0 - Data migration foundation`
+`v1.3.0 - Email provider foundation`
 
 ## Create The Project
 
@@ -23,7 +23,7 @@ Use:
 ```text
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-public-anon-key
-VITE_COLLECTRA_VERSION=v0.9.0
+VITE_COLLECTRA_VERSION=v1.3.0
 ```
 
 Do not commit `.env.local`.
@@ -46,16 +46,27 @@ Test:
 6. Click **Seed demo data**.
 7. Confirm the live data panel shows customers, deals, invoices, and audit rows.
 8. Mark one open invoice paid and confirm a new audit event appears.
+9. Confirm the pilot readiness panel shows environment, session, workspace, live data, audit trail, and payment write checks.
+10. Deploy the `generate-followup` Edge Function and generate one AI draft.
+11. Queue the approved draft and confirm it appears in outbound review.
+12. Deploy the `send-queued-email` Edge Function.
+13. Save active sender settings in **Email provider**.
+14. Send one queued email and confirm the queue status changes.
 
 ## Migration Notes
 
 - Seed demo data only in a fresh test workspace. The app prevents seeding when customers, deals, or invoices already exist.
+- The preferred seed path is `public.seed_demo_workspace`, which runs as a database transaction.
 - Browser code uses the Supabase anon key only. Keep service-role keys outside the frontend.
-- Production migration should move bulk imports into a server-side RPC or Edge Function so multi-table writes can be transactional.
+- Production bulk imports should keep using RPC or Edge Function boundaries so multi-table writes stay transactional.
+- Set `OPENAI_API_KEY` and `OPENAI_MODEL` as Supabase Edge Function secrets, never as Vite browser variables.
+- Set `EMAIL_PROVIDER` and `RESEND_API_KEY` as Supabase Edge Function secrets before testing live email.
+- Do not connect production sender domains until queued message approvals, audit logs, and sender verification are complete.
 
 ## Security Expectations
 
 - RLS must stay enabled.
 - Service-role keys must never be used in browser code.
 - The public anon key is acceptable only with RLS enabled and tested.
+- Provider API keys must stay in Supabase Edge Function secrets.
 - Run GitHub Actions after pushing.

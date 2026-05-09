@@ -1,6 +1,6 @@
 # Collectra
 
-Current visible version: `v0.9.0 - Data migration foundation`
+Current visible version: `v1.3.0 - Email provider foundation`
 
 Collectra is a B2B money operations product for small and mid-sized companies that sell through quotes, invoices, payment terms, and follow-ups.
 
@@ -30,6 +30,10 @@ B2B trading, import/export, distributors, and service businesses that already ma
 - Audit log design for finance-sensitive actions
 - Supabase setup guide and workspace bootstrap foundation
 - Supabase CRUD helpers and demo data seeding for workspace migration tests
+- Supabase live pilot checklist and transactional seed RPC
+- Supabase Edge Function scaffold for AI follow-up drafts
+- Outbound message queue for approved email, WhatsApp, and manual follow-ups
+- Email provider settings and server-side queued email send function
 - Product blueprint in `docs/product-blueprint.md`
 
 ## Project Structure
@@ -46,13 +50,14 @@ B2B trading, import/export, distributors, and service businesses that already ma
 
 1. Create and connect a Supabase project.
 2. Run the schema and seed a test workspace from the platform app.
-3. Replace demo AI copy with an OpenAI-powered follow-up workflow.
-4. Add email, WhatsApp, and accounting integrations.
-5. Add user roles, activity history, and audit trails.
+3. Deploy the `generate-followup` Edge Function and set AI secrets in Supabase.
+4. Deploy the `send-queued-email` Edge Function and set Resend secrets in Supabase.
+5. Save active sender settings and test one queued email send.
+6. Add WhatsApp provider settings and send function.
 
 ## SaaS Track
 
-See `docs/saas-roadmap.md`, `docs/supabase-setup.md`, and `platform/README.md` for the React/Vite/Supabase build path.
+See `docs/saas-roadmap.md`, `docs/supabase-setup.md`, `docs/supabase-pilot.md`, `docs/ai-followup-foundation.md`, `docs/send-queue-foundation.md`, `docs/email-provider-foundation.md`, and `platform/README.md` for the React/Vite/Supabase build path.
 
 ## Security
 
