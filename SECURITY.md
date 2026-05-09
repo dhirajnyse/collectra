@@ -6,8 +6,8 @@ Collectra is currently an early-stage product. The public GitHub Pages app is a 
 
 | Version | Status |
 | --- | --- |
-| v0.7.x | Active development |
-| v0.6.x and earlier | Prototype history |
+| v0.9.x | Active development |
+| v0.8.x and earlier | Prototype history |
 
 ## Reporting a Vulnerability
 
@@ -37,7 +37,7 @@ Collectra handles business contact, deal, invoice, payment, and AI-generated fol
 
 - Static demo: browser-only prototype using `localStorage`
 - Platform scaffold: React/Vite/Supabase-ready
-- Database draft: workspace membership, audit logs, plus row-level security policies
+- Database draft: workspace membership, demo data migration helpers, audit logs, plus row-level security policies
 - Automation: GitHub dependency audit and CodeQL workflows added
 
 ## Secrets

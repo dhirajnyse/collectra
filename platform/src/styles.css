@@ -184,20 +184,58 @@ p {
   opacity: 0.7;
 }
 
+.subtle-button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.subtle-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.mini-button,
+.invoice-actions button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.invoice-actions button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .auth-message {
   margin: 14px 0 0;
 }
 
 .workflow-list,
 .customer-list,
-.audit-list {
+.audit-list,
+.workspace-list {
   display: grid;
   gap: 10px;
 }
 
 .workflow-list article,
 .customer-list article,
-.audit-list article {
+.audit-list article,
+.workspace-list article {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
@@ -218,6 +256,139 @@ p {
   display: block;
   margin-top: 5px;
   color: var(--muted);
+}
+
+.workspace-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.workspace-list article.selected {
+  border-color: #9acfc4;
+  background: #f3fbf8;
+}
+
+.workspace-list span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  background: #edf8f4;
+  color: var(--teal) !important;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.live-data-panel {
+  margin-bottom: 16px;
+}
+
+.data-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.data-summary span,
+.empty-state {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.data-summary strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 24px;
+}
+
+.bundle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 14px;
+}
+
+.bundle-grid h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.mini-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 70px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.mini-list span,
+.empty-state span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.invoice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 156px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 999px;
+  background: #edf8f4;
+  color: var(--teal);
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-chip.overdue {
+  background: #fdecea;
+  color: var(--red);
+}
+
+.status-chip.due {
+  background: #fff4dc;
+  color: #a16500;
+}
+
+.status-chip.paid {
+  background: #edf8f4;
+  color: var(--teal);
 }
 
 .audit-list {
@@ -289,6 +460,8 @@ p {
 
   .metric-grid,
   .workspace-grid,
+  .data-summary,
+  .bundle-grid,
   .audit-list,
   .roadmap {
     grid-template-columns: 1fr;
@@ -296,5 +469,17 @@ p {
 
   .status-card {
     width: 100%;
+  }
+
+  .workspace-list article,
+  .mini-list article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .workspace-actions,
+  .invoice-actions {
+    justify-content: flex-start;
+    min-width: 0;
   }
 }

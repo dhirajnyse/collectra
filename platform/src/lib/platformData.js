@@ -29,11 +29,15 @@ export const demoWorkflow = [
   },
   {
     title: "2. Load workspace",
-    detail: "Customers, deals, invoices, and collection history load from secured tables."
+    detail: "Workspace membership, customers, deals, invoices, and audit history load from secured tables."
   },
   {
-    title: "3. Collect cash",
-    detail: "AI drafts follow-ups, finance marks payments, and the owner sees risk."
+    title: "3. Seed demo data",
+    detail: "A fresh workspace can import the first demo customer, deal, and invoice bundle."
+  },
+  {
+    title: "4. Collect cash",
+    detail: "Finance marks payments, audit logs track changes, and the owner sees risk."
   }
 ];
 
@@ -63,5 +67,10 @@ export const schemaChecklist = [
   "invoices",
   "ai_followups",
   "audit_logs",
+  "workspace bootstrap",
+  "demo seed migration",
+  "CRUD service helpers",
+  "updated_at triggers",
+  "performance indexes",
   "row level security policies"
 ];

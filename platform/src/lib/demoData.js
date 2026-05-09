@@ -1,25 +1,25 @@
-export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v0.7.0";
+export const version = import.meta.env.VITE_COLLECTRA_VERSION || "v0.9.0";
 
 export const demoMetrics = [
   {
     label: "Platform",
     value: "React",
-    note: "Vite build ready"
+    note: "Workspace UI ready"
   },
   {
     label: "Database",
     value: "Supabase",
-    note: "RLS policies drafted"
+    note: "CRUD and seed helpers"
   },
   {
     label: "Auth",
     value: "Magic link",
-    note: "Service helpers ready"
+    note: "Session detection ready"
   },
   {
     label: "AI",
     value: "Queued",
-    note: "Follow-up agent after backend"
+    note: "Follow-up agent next"
   }
 ];
 
@@ -32,12 +32,12 @@ export const roadmap = [
   {
     status: "Ready",
     title: "Supabase connection",
-    detail: "Create the project, add credentials, run the schema, and replace localStorage with database reads and writes."
+    detail: "Create the project, add credentials, run the schema, and load the first workspace bundle."
   },
   {
     status: "Now",
-    title: "Authentication and workspaces",
-    detail: "Use magic-link login, workspace membership, and owner/admin roles."
+    title: "Data migration foundation",
+    detail: "Seed demo customers, deals, and invoices into Supabase, then audit payment updates."
   },
   {
     status: "After",

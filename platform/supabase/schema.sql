@@ -80,6 +80,47 @@ create table if not exists public.audit_logs (
   created_at timestamptz not null default now()
 );
 
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists set_workspaces_updated_at on public.workspaces;
+create trigger set_workspaces_updated_at
+before update on public.workspaces
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_customers_updated_at on public.customers;
+create trigger set_customers_updated_at
+before update on public.customers
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_deals_updated_at on public.deals;
+create trigger set_deals_updated_at
+before update on public.deals
+for each row execute function public.set_updated_at();
+
+drop trigger if exists set_invoices_updated_at on public.invoices;
+create trigger set_invoices_updated_at
+before update on public.invoices
+for each row execute function public.set_updated_at();
+
+create index if not exists idx_workspace_members_user_id on public.workspace_members(user_id);
+create index if not exists idx_customers_workspace_id on public.customers(workspace_id);
+create index if not exists idx_deals_workspace_id on public.deals(workspace_id);
+create index if not exists idx_deals_customer_id on public.deals(customer_id);
+create index if not exists idx_invoices_workspace_id on public.invoices(workspace_id);
+create index if not exists idx_invoices_customer_id on public.invoices(customer_id);
+create index if not exists idx_invoices_due_date on public.invoices(due_date);
+create index if not exists idx_ai_followups_workspace_id on public.ai_followups(workspace_id);
+create index if not exists idx_audit_logs_workspace_created_at on public.audit_logs(workspace_id, created_at desc);
+
 create or replace function public.is_workspace_member(target_workspace_id uuid)
 returns boolean
 language sql
@@ -123,7 +164,7 @@ drop policy if exists "workspace members can read workspaces" on public.workspac
 create policy "workspace members can read workspaces"
 on public.workspaces
 for select
-using (public.is_workspace_member(id));
+using (public.is_workspace_member(id) or owner_id = auth.uid());
 
 drop policy if exists "authenticated users can create owned workspaces" on public.workspaces;
 create policy "authenticated users can create owned workspaces"

@@ -1,6 +1,6 @@
 # Collectra
 
-Current visible version: `v0.7.0 - Audit foundation`
+Current visible version: `v0.9.0 - Data migration foundation`
 
 Collectra is a B2B money operations product for small and mid-sized companies that sell through quotes, invoices, payment terms, and follow-ups.
 
@@ -28,6 +28,8 @@ B2B trading, import/export, distributors, and service businesses that already ma
 - Top-center version badge for deployment testing
 - Security policy, threat model, and secure coding checklist
 - Audit log design for finance-sensitive actions
+- Supabase setup guide and workspace bootstrap foundation
+- Supabase CRUD helpers and demo data seeding for workspace migration tests
 - Product blueprint in `docs/product-blueprint.md`
 
 ## Project Structure
@@ -43,14 +45,14 @@ B2B trading, import/export, distributors, and service businesses that already ma
 ## Next Build Steps
 
 1. Create and connect a Supabase project.
-2. Add authenticated workspaces and a backend database.
+2. Run the schema and seed a test workspace from the platform app.
 3. Replace demo AI copy with an OpenAI-powered follow-up workflow.
 4. Add email, WhatsApp, and accounting integrations.
 5. Add user roles, activity history, and audit trails.
 
 ## SaaS Track
 
-See `docs/saas-roadmap.md` and `platform/README.md` for the React/Vite/Supabase build path.
+See `docs/saas-roadmap.md`, `docs/supabase-setup.md`, and `platform/README.md` for the React/Vite/Supabase build path.
 
 ## Security
 

@@ -2,7 +2,7 @@
 
 ## Current Live Version
 
-`v0.7.0 - Audit foundation`
+`v0.9.0 - Data migration foundation`
 
 The root app is still a static GitHub Pages demo. It now shows the version badge at the top middle so deployments are easy to identify.
 
@@ -37,6 +37,24 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 - CSV formula-injection hardening
 - JSON import validation guardrails
 
+## v0.8.0 Additions
+
+- Supabase session detection in the platform app
+- Sign-out action
+- Workspace creation form
+- Workspace membership listing
+- SQL indexes for workspace-scoped data
+- `updated_at` triggers for mutable tables
+- Supabase setup guide
+
+## v0.9.0 Additions
+
+- Supabase CRUD service helpers for customers, deals, and invoices
+- Demo seed bundle for fresh workspace migration testing
+- Live workspace bundle panel in the platform UI
+- Invoice **Mark paid** action with audit logging
+- Platform docs updated for seed/load verification
+
 ## Next Steps
 
 1. Create a Supabase project.
@@ -45,7 +63,8 @@ It is not replacing the public demo yet. It exists so we can build the real SaaS
 4. Run `platform/supabase/schema.sql` in Supabase SQL editor.
 5. Run the platform app locally with `npm install` and `npm run dev`.
 6. Test magic-link login locally.
-7. Replace localStorage workflows with Supabase queries.
-8. Add workspace creation after first login.
-9. Wire create/update/payment actions to audit logging.
+7. Create a workspace after first login.
+8. Seed demo customers, deals, and invoices into Supabase.
+9. Load the workspace bundle and test marking an invoice paid.
 10. Add OpenAI-powered follow-up generation.
+11. Add email/WhatsApp send actions and accounting integrations.
